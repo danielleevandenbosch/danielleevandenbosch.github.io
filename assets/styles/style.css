@@ -1,0 +1,8 @@
+body 
+{
+    background-image: url("../subtle_patterns/cream-paper.png");
+}
+header, main, footer
+{
+    margin: .5em;
+}
