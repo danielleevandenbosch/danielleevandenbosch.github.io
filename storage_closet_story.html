@@ -2,140 +2,199 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport"
-              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <title>IT Hardware Storage </title>
         <link rel="stylesheet" type="text/css" href="assets/styles/slide_show_images.css">
         <link rel="stylesheet" type="text/css" href="assets/styles/slide_show_gallery.css">
         <link rel="stylesheet" type="text/css" href="assets/styles/storage_closet_story.css">
+        <link rel="stylesheet" type="text/css" href="assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <script rel="script" type="text/javascript" src="assets/node_modules/jquery/dist/jquery.min.js"></script>
+        <script rel="script" type="text/javascript" src="assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script rel="script" type="text/javascript" src="assets/scripts/slide_show_gallery.js"></script>
+        <script rel="script" type="text/javascript" src="assets/scripts/script.js"></script>
     </head>
-    <body>
-        <header>
-            <h1>
-                IT Hardware Storage Solutions
-            </h1>
-            <hr>
-        </header>
-        <main>
-            <p>
-                Working in IT can come with many challanges. One of which is keeping a we orginized stock room. While I was at Stone Plastics, this was no acception.
-            </p>
-            <p>
-                Many times, when a piece of equipment was needed,
-                you would go up there and look for it to only come up blank or you would have to wade through a mountain of trash to get what you were looking for.
-                To many of you, these images might look familiar in terms of your current IT storage solution.
-            </p>
-
-            <article class="super_slideshowcontainer">
-                <div class="slideshow-container">
+    <body onload="body_load()">
+        <div class="everything">
+            <header>
+                <h1>
+                    IT Hardware Storage Solutions
+                </h1>
+                <hr>
+            </header>
+            <main>
+                <div class="container1">
                     <h3 class="centre">IT Hardware Mess</h3>
+                    <hr>
+                    <div class="row">
+                        <div class="column4">
+                            <img class="demo1 cursor small_square"
+                                 src="assets/img/storage_closet/inside_old.JPG"
+                                 style="width:100%"
+                                 onclick="currentSlide_gallery(1,1,'Old picture of the inside of the closet')"
+                                 alt="Old picture of the inside of the closet"
+                                 title="inside_old.JPG">
+                        </div>
+                        <div class="column4">
+                            <img class="demo1 cursor small_square"
+                                 src="assets/img/storage_closet/inside_old2.JPG"
+                                 style="width:100%"
+                                 onclick="currentSlide_gallery(2,1,'Wide angle of the inside of the closet')"
+                                 alt="Wide angle of the inside of the closet"
+                                 title="inside_old2.JPG">
+                        </div>
+                        <div class="column4">
+                            <img class="demo1 cursor small_square"
+                                 src="assets/img/storage_closet/outside_old.JPG"
+                                 style="width:100%"
+                                 onclick="currentSlide_gallery(3,1,'This was when I first started cleaning up.')"
+                                 alt="This was when I first started cleaning up."
+                                 title="outside_old.JPG">
+                        </div>
+                        <div class="column4">
+                            <img class="demo1 cursor small_square"
+                                 src="assets/img/storage_closet/outside_old2.JPG"
+                                 style="width:100%"
+                                 onclick="currentSlide_gallery(4,1,'Junk all over the place')"
+                                 alt="Junk all over the place"
+                                 title="outside_old2.JPG">
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="mySlides_gallery1" id="firstimg1">
+                        <img src="assets/img/storage_closet/inside_old.JPG" style="width:100%" alt="inside_new.JPG" title="inside_old.JPG">
+                    </div>
 
-                    <div class="mySlides fade">
-                        <img src=assets/img/storage_closet/outside_old.JPG alt="outside_old.JPG" class="responsive" title="outside_old">
+                    <div class="mySlides_gallery1">
+                        <img src="assets/img/storage_closet/inside_old2.JPG" style="width:100%" alt="inside_new2.JPG" title="inside_old2.JPG">
                     </div>
-                    <div class="mySlides fade">
-                        <img src=assets/img/storage_closet/outside_old2.JPG alt="outside_old2.JPG" class="responsive" title="outside_old2">
-                    </div>
-                    <div class="mySlides fade">
-                        <img src=assets/img/storage_closet/inside_old.JPG alt="inside_old.JPG" class="responsive" title="inside_old">
-                    </div>
-                    <div class="mySlides fade">
-                        <img src=assets/img/storage_closet/inside_old2.JPG alt="inside_old2.JPG" class="responsive" title="inside_old2">
-                    </div>
-                    <!--
-                    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-                    <a class="next" onclick="plusSlides(1)">&#10095;</a>
-                    -->
-                </div>
-            </article>
-            <br>
 
-            <div style="text-align:center">
-                <span class="dot" onclick="currentSlide(1)"></span>
-                <span class="dot" onclick="currentSlide(2)"></span>
-                <span class="dot" onclick="currentSlide(3)"></span>
-                <span class="dot" onclick="currentSlide(4)"></span>
-            </div>
-            <p>
-                My education background is in manufactured quality and chemistry. I always knew the IT storage closet was a bit insane where I worked.
-                One day the regular IT guy went on vacation giving me the opportunity to to dive in to organization under the 5S methodology.
-            </p>
-            <h4><a href="https://en.wikipedia.org/wiki/5S_(methodology)" title="Click to see the Wikipedia entry1">The 5S Methodology</a></h4>
-            <ul>
-                <li><b>S</b>ort</li>
-                <li><b>S</b>et in Order</li>
-                <li><b>S</b>hine</li>
-                <li><b>S</b>tandardize</li>
-                <li><b>S</b>ustain</li>
-            </ul>
-            <p>
-                I was told by one of the controls engineers that while I might spend some time organizing the IT storage closet, it wouldn't stay clean.
-                It would have to be done periodically. I don't think this is gonna be the case, and it is not because of the people I worked with.
-                It is because the many times before when it was cleaned, people would not follow the last 2 steps.
-            </p>
-            <p>
-                The persons before me didn't standardize the area, and you can't sustain your sort or set in order without stanardization. Following months of work, these were the results.
-            </p>
+                    <div class="mySlides_gallery1">
+                        <img src="assets/img/storage_closet/outside_old.JPG" style="width:100%" alt="outside_new.JPG" title="outside_old.JPG">
+                    </div>
 
-            <div class="container">
-                <h3 class="centre">IT Hardware Cleaned Up</h3>
+                    <div class="mySlides_gallery1">
+                        <img src="assets/img/storage_closet/outside_old2.JPG" style="width:100%" alt="outside_new2.JPG" title="outside_old2.JPG">
+                    </div>
+
+                    <div class="caption-container">
+                        <p id="caption1"></p>
+                    </div>
+                </div><!--END MESS IMAGES-->
                 <hr>
-                <div class="row">
-                    <div class="column">
-                        <img class="demo cursor small_square" src="assets/img/storage_closet/inside_new.JPG" style="width:100%" onclick="currentSlide_gallery(1)" alt="Top view of the interior of the storage closet" title="inside_new.JPG">
+                <p>
+                    Working in IT can come with many challenges. One of which is keeping a well organized stock room. While I was at Stone Plastics, this was no exception.
+                </p>
+                <p>
+                    Many times, when a piece of equipment was needed,
+                    you would go up there and look for it to only come up blank or you would have to wade through a mountain of trash to get what you were looking for.
+                    To many of you, these images might look familiar in terms of your current IT storage solution.
+                </p>
+                <br>
+                <p>
+                    My education background is in manufactured quality and chemistry. I always knew the IT storage closet was a bit insane where I worked.
+                    One day the regular IT guy went on vacation giving me the opportunity to to dive in to organization under the 5S methodology.
+                </p>
+                <h4><a href="https://en.wikipedia.org/wiki/5S_(methodology)" title="Click to see the Wikipedia entry1">The 5S Methodology</a></h4>
+                <ul>
+                    <li><b>S</b>ort</li>
+                    <li><b>S</b>et in Order</li>
+                    <li><b>S</b>hine</li>
+                    <li><b>S</b>tandardize</li>
+                    <li><b>S</b>ustain</li>
+                </ul>
+                <p>
+                    I was told by one of the controls engineers that while I might spend some time organizing the IT storage closet, it wouldn't stay clean.
+                    It would have to be done periodically. I don't think this is gonna be the case, and it is not because of the people I worked with.
+                    It is because the many times before when it was cleaned, no standard was created to sustain.
+                </p>
+                <p>
+                    As you can see, every box is labeled with a title and a picture. Inside every box, every cable is <span id="show_coiling" onmouseover="show_coiling()" onmouseout="hide_coiling()">coiled and bound</span> too keep things from tangling.
+                    In addition to that I also created a <span id="show_kanban" onmouseover="show_kanban()" onmouseout="hide_kanban()">kanban card</span> system to help make sure people never had to wait on a cable to set something up.
+                </p>
+                <span>
+                    <img src="assets/img/storage_closet/box_inside.JPG" id="coilingimage" alt="coiled up cables">
+                </span>
+                <span>
+                    <img src="assets/img/storage_closet/kanban.JPG" id="kanbanimage" alt="Kanban cards">
+                </span>
+                <p>
+                    The persons before me didn't standardize the area, and you can't sustain your sort or set in order without standardization. Following months of work, these were the results.
+                </p>
+
+                <div class="container2">
+                    <h3 class="centre">IT Hardware Cleaned Up</h3>
+                    <hr>
+                    <div class="row">
+                        <div class="column5">
+                            <img class="demo2 cursor small_square"
+                                 src="assets/img/storage_closet/inside_new.JPG"
+                                 style="width:100%"
+                                 onclick="currentSlide_gallery(1,2,'Top view of the interior of the storage closet')"
+                                 alt="Top view of the interior of the storage closet" title="inside_new.JPG">
+                        </div>
+                        <div class="column5">
+                            <img class="demo2 cursor small_square"
+                                 src="assets/img/storage_closet/inside_new2.JPG"
+                                 style="width:100%"
+                                 onclick="currentSlide_gallery(2,2,'View of all the spare servers')"
+                                 alt="View of all the spare servers"
+                                 title="inside_new2.JPG">
+                        </div>
+                        <div class="column5">
+                            <img class="demo2 cursor small_square"
+                                 src="assets/img/storage_closet/outside_new.JPG"
+                                 style="width:100%"
+                                 onclick="currentSlide_gallery(3,2,'View of the outside racks and the boxes with equipment')"
+                                 alt="View of the outside racks and the boxes with equipment"
+                                 title="outside_new.JPG">
+                        </div>
+                        <div class="column5">
+                            <img class="demo2 cursor small_square"
+                                 src="assets/img/storage_closet/outside_new2.JPG"
+                                 style="width:100%"
+                                 onclick="currentSlide_gallery(4,2,'')"
+                                 alt="Another view of the outside racks and the boxes with equipment"
+                                 title="outside_new2.JPG">
+                        </div>
+                        <div class="column5">
+                            <img class="demo2 cursor small_square"
+                                 src="assets/img/storage_closet/outside_new3.JPG"
+                                 style="width:100%"
+                                 onclick="currentSlide_gallery(5,2,'Yet another view of the outside racks and the boxes with equipment')"
+                                 alt="View of the outside racks and the boxes with equipment"
+                                 title="outside_new3.JPG">
+                        </div>
                     </div>
-                    <div class="column">
-                        <img class="demo cursor small_square" src="assets/img/storage_closet/inside_new2.JPG" style="width:100%" onclick="currentSlide_gallery(2)" alt="View of all the spare servers" title="inside_new2.JPG">
+                    <hr>
+                    <div class="mySlides_gallery2" id="firstimg2">
+                        <img src="assets/img/storage_closet/inside_new.JPG" style="width:100%" alt="inside_new.JPG" title="inside_new.JPG">
                     </div>
-                    <div class="column">
-                        <img class="demo cursor small_square" src="assets/img/storage_closet/outside_new.JPG" style="width:100%" onclick="currentSlide_gallery(3)" alt="View of the outside racks and the boxes with equipment" title="outside_new.JPG">
+
+                    <div class="mySlides_gallery2">
+                        <img src="assets/img/storage_closet/inside_new2.JPG" style="width:100%" alt="inside_new2.JPG" title="inside_new2.JPG">
                     </div>
-                    <div class="column">
-                        <img class="demo cursor small_square" src="assets/img/storage_closet/outside_new2.JPG" style="width:100%" onclick="currentSlide_gallery(4)" alt="View of the outside racks and the boxes with equipment" title="outside_new2.JPG">
+
+                    <div class="mySlides_gallery2">
+                        <img src="assets/img/storage_closet/outside_new.JPG" style="width:100%" alt="outside_new.JPG" title="outside_new.JPG">
                     </div>
-                    <div class="column">
-                        <img class="demo cursor small_square" src="assets/img/storage_closet/outside_new3.JPG" style="width:100%" onclick="currentSlide_gallery(5)" alt="View of the outside racks and the boxes with equipment" title="outside_new3.JPG">
+
+                    <div class="mySlides_gallery2">
+                        <img src="assets/img/storage_closet/outside_new2.JPG" style="width:100%" alt="outside_new2.JPG" title="outside_new2.JPG">
                     </div>
+
+                    <div class="mySlides_gallery2">
+                        <img src="assets/img/storage_closet/outside_new3.JPG" style="width:100%" alt="outside_new3.JPG" title="outside_new3.JPG">
+                    </div>
+                    <div class="caption-container">
+                        <p id="caption2"></p>
+                    </div>
+
                 </div>
                 <hr>
-                <div class="mySlides_gallery">
-                    <img src="assets/img/storage_closet/inside_new.JPG" style="width:100%" alt="inside_new.JPG" title="inside_new.JPG">
-                </div>
-
-                <div class="mySlides_gallery">
-                    <img src="assets/img/storage_closet/inside_new2.JPG" style="width:100%" alt="inside_new2.JPG" title="inside_new2.JPG">
-                </div>
-
-                <div class="mySlides_gallery">
-                    <img src="assets/img/storage_closet/outside_new.JPG" style="width:100%" alt="outside_new.JPG" title="outside_new.JPG">
-                </div>
-
-                <div class="mySlides_gallery">
-                    <img src="assets/img/storage_closet/outside_new2.JPG" style="width:100%" alt="outside_new2.JPG" title="outside_new2.JPG">
-                </div>
-
-                <div class="mySlides_gallery">
-                    <img src="assets/img/storage_closet/outside_new3.JPG" style="width:100%" alt="outside_new3.JPG" title="outside_new3.JPG">
-                </div>
-
-
-                <a class="prev" onclick="plusSlides(-1)">❮</a>
-                <a class="next" onclick="plusSlides(1)">❯</a>
-
-                <div class="caption-container">
-                    <p id="caption"></p>
-                </div>
-
-            </div>
-            <hr>
-
-
-        </main>
-        <footer>
-            &copy; Dan Van Den Bosch 2021
-        </footer>
+            </main>
+            <footer>
+                &copy; Dan Van Den Bosch 2021
+            </footer>
+        </div>
     </body>
 </html>
-<script rel="script" type="text/javascript" src="assets/scripts/slide_show_images.js"></script>
-<script rel="script" type="text/javascript" src="assets/scripts/slide_show_gallery.js"></script>

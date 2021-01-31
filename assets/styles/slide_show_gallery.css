@@ -11,12 +11,12 @@ img {
 }
 
 /* Position the image container (needed to position the left and right arrows) */
-.container {
+.container1, .container2 {
     position: relative;
 }
 
 /* Hide the images by default */
-.mySlides_gallery {
+.mySlides_gallery1, .mySlides_gallery2{
     display: none;
 }
 
@@ -76,18 +76,26 @@ img {
     clear: both;
 }
 
-/* Six columns side by side */
-.column {
+/*  columns side by side */
+.column5 {
     float: left;
     width: 20%;
 }
 
+/*  columns side by side */
+.column4 {
+    float: left;
+    width: 25%;
+}
+
 /* Add a transparency effect for thumnbail images */
-.demo {
+.demo1, .demo2 {
     opacity: 0.6;
 }
 
-.active,
-.demo:hover {
+.active
+, .demo1:hover
+, .demo2:hover
+{
     opacity: 1;
 }
