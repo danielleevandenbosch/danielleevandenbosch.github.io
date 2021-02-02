@@ -15,6 +15,10 @@
 #show_coiling, #show_kanban {
      text-decoration: underline;
 }
-.everything {
-     padding: .75em;
+
+
+@media screen {
+     body {
+          padding: 5%;
+     }
 }
