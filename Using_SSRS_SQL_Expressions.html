@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="EN">
+	<head>
+		<title> SSRS SQL Expressions</title>
+        <link rel="stylesheet" type="text/css" href="assets/styles/slide_show_images.css">
+        <link rel="stylesheet" type="text/css" href="assets/styles/slide_show_gallery.css">
+        <link rel="stylesheet" type="text/css" href="assets/styles/storage_closet_story.css">
+        <link rel="stylesheet" type="text/css" href="assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <script rel="script" type="text/javascript" src="assets/node_modules/jquery/dist/jquery.min.js"></script>
+        <script rel="script" type="text/javascript" src="assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script rel="script" type="text/javascript" src="assets/scripts/slide_show_gallery.js"></script>
+        <script rel="script" type="text/javascript" src="assets/scripts/script.js"></script>
+	</head>
+	<body>
+		<div class="everything">
+			<h1>Using SSRS SQL Expressions</h1>
+
+			<h2>Tools needed:</h2>
+
+			<h4>Hard Returns remover:</h4>
+			<p>I recommend the following:</p> 
+			<p><a href="https://www.textfixer.com/tools/remove-line-breaks.php">https://www.textfixer.com/tools/remove-line-breaks.php</a></p>
+
+			<h4>SQL Formatter</h4>
+			<p>I Recommend the following:</p> 
+			<p><a href="http://poorsql.com/">http://poorsql.com/</a></p>
+
+
+
+			<h2>When Using SQL Server:</h2> 
+			I would suggest writing your SQL Statement with a common table expression. That way, when the parameters need adjustment or you need to add more of them, they are easy to find because they are at the top of your SQL Statement. When using multiple values, I typically do not use a common table expression (Not saying you can't, but you will have top get creative) 
+
+			<h2>When using Progress DB </h2>
+			Unfortunately, OpenEdge Databases do not support Common Table Expressions at this time, so you will have to hunt in your SQL statement for the <code>WHERE</code> clause and put your parameter there. 
+
+			<h2>Using multiple values: </h2>
+			<p>I would suggest using the IN Command for this. </p>
+			<p>When using multiple values, if the values are text, they must be surrounded with 'single quotes'. </p>
+
+			<p>To accomplish this in progress I will set the parameter options to a query that has a <code>SELECT</code> list that looks like the following.</p>
+			<code>
+			SELECT CONCAT(CONCAT('''', mytable.myfield),'''') AS value            
+				, mytable.myfield                            AS label
+			FROM pub.mytable
+			</code>
+			<p>Then the main query that the SSRS Report will execute will have a <code>WHERE</code> clause that looks like the following: </p>
+
+			<p>
+			<code>
+			WHERE table.field IN (" + JOIN(Parameters!ParameterName.Value,"," + ")
+			</code>
+			</p>
+			<h2>Troubleshooting: </h2>
+
+			<h4>Compile time error: </h4>
+			<p><i>When you save the report it refuses to save and is saying something about your main query</i></p>
+
+			<p>You probably have a quote that is out of place or you missed an SSRS concatenation operator.</p>
+			
+
+			<h4>Run time error:</h4>
+
+			<p><i>The report will save, however it will not run and it is saying that your main query is broken.</i></p>
+
+			<p>You will need to make 2 dummy parameters that will be deleted later. Copy the sql expression to one of the parameters. 
+			After you fill in your other parameter values, this new parameter containing your sql expression will populate itself. Copy the code you your SQL formatting tool and then from there copy your formatted SQL to your favorite SQL IDE (I recommend DataGrip or Dbeaver depending on your situation)</p>
+			<p>From there you should be able to find where the problem is with your SQL statement either with syntax highlighting or when you try to run it, it will tell you a pretty good idea of what the problem is.</p>
+		</div>
+	</body>
+</html>
