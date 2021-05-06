@@ -14,7 +14,15 @@
 	<body>
 		<div class="everything">
 			<h1>Using SSRS SQL Expressions</h1>
-
+			<h2>Why you would want to do this?</h2>
+			<p>
+			When you use an SSRS expression vs the SSRS built in filtering there are a couple of advantages
+				<ul>
+					<li>the lower level of your tech stack is sending fewer packets to the next level.</li>
+					<li>RDBMSs are really good at filtering data. (This means faster reports)</li>
+					<li>It will standardize where data is filtered in our ssrs reports (As there are several ways to filter in SSRS)</li>
+				</ul>
+			</p>
 			<h2>Tools needed:</h2>
 
 			<h4>Hard Returns remover:</h4>
