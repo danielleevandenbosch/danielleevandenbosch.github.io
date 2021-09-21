@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+	</head>
+	<body>
+		<h1>
+			VDB C# For SSIS Script Tasks
+		</h1>
+		<p>
+			This is a set a series of functions that can be used to to access either a Postgres or SQL server database 
+		</p>
+		<code>
+			/*
+			Author: Daniel L. Van Den Bosch
+			Date 4/28/2020 
+			Resources used: https://stackoverflow.com/questions/43637009/how-can-i-specify-credentials-for-simple-authentication-in-ssis-smtp-connection
+			*/
+
+			using System.Diagnostics;
+			using System.Net;
+			using System.Net.Mail;
+			using System;
+			using ADODB;
+			namespace abc
+			{
+			    [Microsoft.SqlServer.Dts.Tasks.ScriptTask.SSISScriptTaskEntryPointAttribute]
+			    public partial class ScriptMain : Microsoft.SqlServer.Dts.Tasks.ScriptTask.VSTARTScriptObjectModelBase
+			    {
+			        #region vdbc#
+			        public const string postgresConnStringTest = "DRIVER={PostgreSQL ANSI};DATABASE=ERP_TEST;SERVER=10.1.202.88;UID=pgservice;PWD=Trump2020";  // test
+			        public const string postgresConnString     = "PostgreSQL30";                                                                               // live
+			        public const string SQLServerProd2016      = "Driver={SQL Server};Server=127.0.0.1;Database=MY_DB;Trusted_Connection=True;";               // sql 16
+			        public object           nRecordsAffected   = Type.DefaultBinder;
+			        public object           oParams            = Type.Missing;
+			        public ADODB.Connection ADOConn            = new ADODB.Connection();
+			        public ADODB.Recordset  ADOrec             = new ADODB.Recordset();
+			        public ADODB.Recordset  rs                 = new ADODB.Recordset();
+			        public ADODB.Command    ADOcom             = new ADODB.Command();
+			        public object rc;
+
+			        public void open_ADOConn(string connection_String = postgresConnString)
+			        {
+			            ADODB.Connection conn;
+			            conn = new ADODB.Connection();
+			            conn.ConnectionString = connection_String;
+			            conn.Open();
+			            ADOConn = conn;
+			        }
+
+			        public void open_ADORec(string Native_SQL)
+			        {
+			            ADODB.Recordset rec = new ADODB.Recordset();
+			            rec.LockType         = LockTypeEnum.adLockReadOnly;
+			            rec.CursorType       = CursorTypeEnum.adOpenKeyset; // adOpenKeyset
+			            rec.ActiveConnection = ADOConn;
+			          //  rec.Source           = Native_SQL;
+			            
+			            rec.Open(Native_SQL,ADOConn, CursorTypeEnum.adOpenKeyset, LockTypeEnum.adLockReadOnly,-1);
+
+
+			            ADOrec = rec;
+			            rs = ADOConn.Execute(Native_SQL, out rc, (int)ADODB.CommandTypeEnum.adCmdText);
+			        }
+			        public void adoCommand(string command_text, string connection_String = postgresConnString)
+			        {
+			            ADODB.Command com = new ADODB.Command();
+			            open_ADOConn(connection_String);
+			            // ADOcom = CreateObject("ADODB.Command") 'late binding
+			            com.ActiveConnection = ADOConn;
+			            com.CommandType      = (CommandTypeEnum)1; // adcmdtext
+			            com.CommandText      = command_text;
+			            com.Execute(out nRecordsAffected, ref oParams, (int)ADODB.ExecuteOptionEnum.adExecuteNoRecords);
+			            //  com.Execute();
+			            close_ADOconn();
+			        }
+
+			        public void adoCommandHoldrec(string command_text, string connection_String = postgresConnString)
+			        {
+			            open_ADOConn(connection_String); // we set our connection string incase we arnt using postgres
+			                                             // ADOcom = CreateObject("ADODB.Command")
+			            ADOcom.ActiveConnection = ADOConn;
+			            ADOcom.CommandType      = (CommandTypeEnum)1; // adcmdtext
+			            ADOcom.CommandText      = command_text;
+			            ADOrec                  = ADOcom.Execute(out nRecordsAffected, ref oParams, (int)ADODB.ExecuteOptionEnum.adExecuteNoRecords);
+			        }
+
+			        public string adolookup(string Native_SQL, string connection_String = postgresConnString)
+			        {
+			            string adolookup;
+			            open_ADOConn(connection_String); // database connection layer
+			            open_ADORec(Native_SQL);            // create a recordset for our data
+			            if (ADOrec.BOF && ADOrec.EOF)
+			                adolookup = "0";                         // return 0
+			            else
+			            // adolookup = ADOrec.;// return the first tuple of the first column
+			            adolookup = rs.Collect[0].ToString();// return the first tuple of the first column
+			            close_ADOrec();                                  // close the recordset
+			            close_ADOconn();                                 // close the connection
+			            return adolookup;
+			        }
+			        public bool this_ado_rec_is_empty(string Native_SQL, string connection_String = postgresConnString)
+			        {
+			            bool this_ado_rec_is_empty;
+			            open_ADOConn(connection_String);
+			            open_ADORec(Native_SQL);
+
+			            if (ADOrec.EOF & ADOrec.BOF)
+			                this_ado_rec_is_empty = true;
+			            else
+			                this_ado_rec_is_empty = false;
+
+			            close_ADOrec();
+			            close_ADOconn();
+			            return this_ado_rec_is_empty;
+			        }
+
+
+
+
+			        public void close_ADOrec()
+			        {
+			            if (!(ADOrec == null))
+			            {
+			                ADOrec.Close();
+			                ADOrec = null;
+			            }
+			        }
+
+			        public void close_ADOconn()
+			        {
+			            if (!(ADOConn == null))
+			            {
+			                ADOConn.Close();
+			                ADOConn = null;
+			            }
+			        }
+			        #endregion
+			        //===================================================================================================================================================
+			    public void Main()
+			    {
+			        string file = Dts.Variables["User::destination_path"].Value.ToString();
+			        string UserName       = "noreply";
+			        string Password       = "hey_i_am_not_giving_you_my_password";
+			        string EmailSender    = "noreply@tandgroup.com";
+
+			        string SMTPEndPoint = "email.tandgroup.com";
+			        Int32  SMTPPort     = 1234;
+
+			        string MessageSubject = "Inventory Levels " + DateTime.Now.ToString("M-d-yyyy htt");
+			        string MessageBody    = "Please see the following attached Excel document <br><br>This details current inventory levels <br>This is an auto generated email. Do not reply as it is not monitored";
+
+			        MailMessage msg = new MailMessage();
+			        //msg.To.Add(new MailAddress("dvandenbosch@tandgroup.com"));
+			        msg.To.Add(new MailAddress("it@tandgroup.com"));
+			        msg.From = new MailAddress(EmailSender);
+			        msg.Subject = MessageSubject;
+			        msg.Body = MessageBody;
+			        msg.IsBodyHtml = true;
+			        msg.Attachments.Add(new System.Net.Mail.Attachment(file));
+			            SmtpClient client = new SmtpClient(SMTPEndPoint, SMTPPort)
+			        {
+			            EnableSsl = true
+			          , DeliveryMethod = SmtpDeliveryMethod.Network
+			          , Credentials = new NetworkCredential(UserName, Password)
+			        };
+			        client.Send(msg);
+			        Dts.TaskResult = (int)ScriptResults.Success;
+			    }
+
+			        //===================================================================================================================================================
+			        public static void SendEmailWAttachment(
+			                                     string sFrom       = "noreply@tandgroup.com"
+			                                   , string sRecepient  = "it@tandgroup.com"
+			                                   , string sCC         = "dvandenbosch@tandgroup.com"
+			                                   , string sBCC        = "dvandenbosch@tandgroup.com"
+			                                   , string sSubject    = "email subject"
+			                                   , string sBody       = "email body"
+			                                   , string sAttachPath = ""
+			                                    )
+			        {
+			            System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
+			          //  Attachment data = new Attachment(file, MediaTypeNames.Application.Octet);
+			            message.To.Add(sRecepient);
+			            if (sCC != "")  {message.CC.Add(sCC);}
+			            if (sBCC != "") {message.CC.Add(sBCC);}
+			            message.Subject = sSubject;
+			            message.IsBodyHtml = true;
+			            message.From = new System.Net.Mail.MailAddress(sFrom);
+			            message.Body = sBody;
+			            message.Attachments.Add(new System.Net.Mail.Attachment(sAttachPath));
+			            System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient("mx2.tandgroup.com");
+			            smtp.Send(message);
+			        }
+
+			        public static void SendEmail(string sFrom      = "noreply@tandgroup.com"
+			                                   , string sRecepient = "it@tandgroup.com"
+			                                   , string sCC        = "dvandenbosch@tandgroup.com"
+			                                   , string sBCC       = "dvandenbosch@tandgroup.com"
+			                                   , string sSubject   = "email subject"
+			                                   , string sBody      = "email body"
+			                            )
+			        {
+			            System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
+			            message.To.Add(sRecepient);
+			            if (sCC != "") { message.CC.Add(sCC); }
+			            if (sBCC != "") { message.CC.Add(sBCC); }
+			            message.Subject = sSubject;
+			            message.IsBodyHtml = true;
+			            message.From = new System.Net.Mail.MailAddress(sFrom);
+			            message.Body = sBody;
+			            System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient("mx2.tandgroup.com");
+			            smtp.Send(message);
+			        } //end function 
+			    }
+
+			    enum ScriptResults
+			    {
+			        Success = Microsoft.SqlServer.Dts.Runtime.DTSExecResult.Success,
+			        Failure = Microsoft.SqlServer.Dts.Runtime.DTSExecResult.Failure
+			    }
+			}
+		</code>
+	</body>
+</html>
