@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Audit Fields</title>
+	</head>
+	<body>
+		<h1>
+			SQL Server Audit Fields
+		</h1>
+		<ul>
+			<li>
+				<b>created_at:</b> Use the following syntax for the default value 
+				<code>
+					getdate()
+				</code>
+			</li>
+			<li>
+				<b>created_by</b> you can Use the following syntax for the default value: 
+				<code>
+					user_name()+'|'+suser_sname()
+				</code>
+			</li>
+		</ul>
+		<h2>
+			Update Triggers
+		</h2>
+		<code>
+			<pre>
+CREATE TRIGGER updateModified
+ON KPI_KPIDaily_daily_data_xlsm.machine
+AFTER UPDATE
+AS
+   UPDATE KPI_KPIDaily_daily_data_xlsm.machine
+   SET machine.updated_at = SYSDATETIME()
+     , machine.updated_by = CURRENT_USER + '|' + system_user
+   FROM Inserted AS i
+   WHERE KPI_KPIDaily_daily_data_xlsm.machine.stat_code = i.stat_code;
+			</pre>
+		</code>
+	</body>
+</html>
