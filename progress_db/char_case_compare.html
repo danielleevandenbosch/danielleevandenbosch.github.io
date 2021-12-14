@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CASE Compare In Progress DB </title>
+    </head>
+    <body>
+        <h1>
+            Comparing char case strings in Progress DB
+        </h1>
+        <p>
+            I am writing about this because I found it to be suprisingly challanging. For the time being until I can come up with a better was to do this I am using the following method: 
+        </p>
+        <hr>
+        <code>
+            <pre>
+SELECT foo.mach_id
+FROM OPENQUERY
+(
+    MYPROGRESSDATABASE
+    ,
+    '
+    SELECT my_table."mach-id" AS mach_id
+    FROM PUB.my_table
+    WITH (NOLOCK)
+    '
+) AS foo
+WHERE cast(foo.mach_id as varbinary(120)) != cast(UPPER(foo.mach_id) as varbinary(120));
+            </pre>
+        </code>
+        <hr>
+        <p>
+            the following example will filter and only give tuples that contain lowercase characters
+        </p>
+        <footer>    
+            Credit goes to the following <a href="https://stackoverflow.com/questions/8160476/locate-upper-case-characters-in-sql-server-database-field">
+            article I found on stackoverflow
+        </a>
+        </footer>
+    </body>
+</html>
