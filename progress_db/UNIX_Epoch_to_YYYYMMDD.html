@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>UNIX Epoch to YYYYMMDD</title>
+    </head>
+    <body>
+        <h1>
+            UNIX Epoch to YYYYMMDD
+        </h1>
+        <p>
+            I had to do this for a client recently. Because I don't have access to ABL in this particular case, this is what I did.
+        </p>
+        <hr>
+        <code>
+            <pre>
+SELECT CONCAT(CONCAT(RIGHT(REPLACE(CAST((CAST('1/1/1970' AS DATE))+(CAST((("my_table"."my_date")/86400) AS INT)) AS VARCHAR(10)),'/',''),4), LEFT(REPLACE(CAST((CAST('1/1/1970' AS DATE))+(CAST((("my_table"."my_date")/86400) AS INT)) AS VARCHAR(10)),'/',''),2)), LEFT(RIGHT(REPLACE(CAST((CAST('1/1/1970' AS DATE))+(CAST((("my_table"."my_date")/86400) AS INT)) AS VARCHAR(10)),'/',''),6),2)) AS yyyymmdd
+FROM pub.my_table
+            </pre>
+        </code>
+        <hr>
+    </body>
+</html>
