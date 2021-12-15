@@ -26,5 +26,24 @@ END
 go
 	        </pre>
 		</code>
+		<h2>
+			int
+		</h2>
+		<code>
+			<pre>
+CREATE FUNCTION dbo.int(@my_val numeric)
+RETURNS INT
+BEGIN;
+--==================================================
+--Author:     Daniel Van Den Bosch, VanData LLC
+--Created At: 11/29/2021
+--==================================================
+DECLARE @retval int;
+    SELECT @retval = CAST(ROUND(@my_val,0) AS int);
+   RETURN @retval;
+END
+go
+			</pre>
+		</code>	
 	</body>
 </html>
