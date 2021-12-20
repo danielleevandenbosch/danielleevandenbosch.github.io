@@ -8,7 +8,7 @@
 			Common Excel Functions In SQL Server
 		</h1>
 		<h2>
-		    MRound
+		    Excel - MRound
 		</h2>
 		<code>
 	        <pre>
@@ -27,22 +27,12 @@ go
 	        </pre>
 		</code>
 		<h2>
-			int
+			Excel - int
 		</h2>
 		<code>
 			<pre>
-CREATE FUNCTION dbo.int(@my_val numeric)
-RETURNS INT
-BEGIN;
---==================================================
---Author:     Daniel Van Den Bosch, VanData LLC
---Created At: 11/29/2021
---==================================================
-DECLARE @retval int;
-    SELECT @retval = CAST(ROUND(@my_val,0) AS int);
-   RETURN @retval;
-END
-go
+--use the pre built function floor. Excel INT rounds down. 
+FLOOR(@my_val)
 			</pre>
 		</code>	
 	</body>
