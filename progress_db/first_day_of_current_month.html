@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>OpenEdge - first day of month</title>
+	</head>
+	<body>
+		<h1>get the first day of the current month</h1>
+		<code>
+			<pre>
+SELECT CURDATE() - (CAST(RIGHT(LEFT(CAST(CURDATE() AS varchar(10)), 5),2) AS int) - 1)
+FROM pub.PM_Company		
+			</pre>
+		</code>
+	</body>
+</html>
