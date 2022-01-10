@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>RDP Clipboard Not Working</title>
+	</head>
+	<body>
+		<h1>RDP Clipboard Not Working</h1>
+		<p>
+			Should your RDP clipboard stop working, might I suggest the following. You can take the code below and shove it in a batch file and run it on both your personal client and the remote machine.
+		</p>
+		<p>
+			<code>
+				<pre>
+@echo off
+
+Taskkill.exe /im rdpclip.exe
+
+Rdpclip.exe				
+				</pre>
+			</code>
+		</p>
+	</body>
+</html>
