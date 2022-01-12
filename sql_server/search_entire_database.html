@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>	</title>
+</head>
+<body>
+  <h1>Find string in field</h1>
+  <p>
+  The following code will search the entire database for a specific string. Go ahead and replace the word 'foo' with your desired string.
+  </p>
+  <p>
+    Giveing credit where credit is due, I got this code from the following <a href="https://www.mytecbits.com/microsoft/sql-server/search-the-whole-database-for-a-value">website</a> and made it NOT a stored proc.
+  </p>
+<code>
+<pre>
+BEGIN
+    SET NOCOUNT ON
+    declare @SearchStr nvarchar(100);
+    SELECT @SearchStr = 'foo';
+    DECLARE @SearchResults TABLE(TableAndColumnName nvarchar(512), ColumnValue nvarchar(max));
+    DECLARE @TableName nvarchar(256), @ColumnName nvarchar(256), @TableAndColumnName nvarchar(512),
+        @TableAndColumnName2 nvarchar(512), @SearchStr2 nvarchar(110);
+ 
+    SET @TableAndColumnName = '';
+    SET @SearchStr2 = QUOTENAME('%' + @SearchStr + '%','''');
+ 
+    WHILE @TableAndColumnName IS NOT NULL
+    BEGIN
+        SELECT TOP 1 @TableAndColumnName = QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)+ '.' + QUOTENAME(COLUMN_NAME),
+                @TableName = QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME), 
+                @ColumnName = QUOTENAME(COLUMN_NAME)
+            FROM INFORMATION_SCHEMA.COLUMNS WITH (NOLOCK) 
+            WHERE OBJECTPROPERTY(
+                    OBJECT_ID(
+                        QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)
+                        ), 'IsMSShipped'
+                ) = 0
+                AND QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)+ '.' + QUOTENAME(COLUMN_NAME) > @TableAndColumnName
+                AND DATA_TYPE IN ('char', 'nchar', 'varchar', 'nvarchar', 'text', 'ntext')
+                ORDER BY QUOTENAME(TABLE_SCHEMA), QUOTENAME(TABLE_NAME), QUOTENAME(COLUMN_NAME);
+ 
+        IF @TableAndColumnName != ISNULL(@TableAndColumnName2, '')
+        BEGIN
+            SET @TableAndColumnName2 = @TableAndColumnName;
+ 
+            INSERT INTO @SearchResults
+            EXEC ('SELECT ''' + @TableAndColumnName + ''', ' + @ColumnName + 
+                ' FROM ' + @TableName + ' WITH (NOLOCK) ' +
+                ' WHERE ' + @ColumnName + ' LIKE ' + @SearchStr2
+            );
+        END
+        ELSE
+        BEGIN
+            BREAK;
+        END
+    END
+ 
+    SELECT TableAndColumnName, ColumnValue FROM @SearchResults
+END
+GO
+</pre>
+</code>
+</body>
+</html>
