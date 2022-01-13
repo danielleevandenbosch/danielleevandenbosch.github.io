@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<!--
+Author: Dan Van Den Bosch 
+Date: 1/13/2022
+-->
+	<head>
+		<title>Multi Mon</title>
+	</head>
+	<body>
+		<h1>
+			Multimonitor Setup and troubleshooting
+		</h1>
+		<fieldset>
+			<legend>
+				Use all on 1 screens
+			</legend>
+			<h4>
+				In RDP you can tell it to use all of your monitors or a single monitor by default with. 
+			</h4>
+			<hr>
+			<p>
+				To toggle between single and multi monitor mode, right click on the rdp file and select edit
+			</p>
+			<img src="./assets/images/rdp_edit.png">
+			<hr>
+			<p>
+				From here you will need to select the display tab
+			</p>
+			<img src="./assets/images/go_to_display.png">
+			<hr>
+			<p>
+				On this page there will be a checkbox where you can select to use all of your monitors or just one. 
+			</p>
+			<img src="./assets/images/all_or_1.png">
+		</fieldset>
+		<br>
+		<br>
+		<br>
+		<fieldset>
+			<legend>
+				Use a custom amount of monitors (Duel monitors on a 3 monitor setup)
+			</legend>
+			<h4>
+				In RDP you can also use a custom number of screens as well. 
+			</h4>
+			<hr>
+			<p>
+				To do this, follow the steps above to set the checkbox <code>Use all my monitors for the remote session</code> to `checked` 
+			</p>
+			<p>
+				You will need to take note of what monitor is numbered what. run <code>mstsc -l</code> in command prompt to see what monitor is what. 
+			</p>
+			<img src="./assets/images/list_monitors_according_to_rdp.png">
+			<hr>
+			<p>
+				Right click on the RDP file and open it with notepad. 
+			</p>
+			<img src="./assets/images/edit_with_notepad.png">
+			<hr>
+			<p>
+				Once in notepad, find the variable <code>selectedmonitors:s</code>. It will have the monitors listed that you wish to use. In my case I set it to <code>selectedmonitors:s:1,2</code>. This may take some trial and error with the numbers. 
+			</p>
+			<img src="./assets/images/notepad_view.png">
+		</fieldset>
+	</body>
+</html>
