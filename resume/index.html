@@ -39,6 +39,39 @@
                     margin-right: 10px;
                 }
             }
+            @media print {
+                @page {
+                    size: A4 portrait;
+                    margin: 20mm;
+                }
+                body {
+                    font-size: 12px;
+                    margin: 0;
+                    padding: 0;
+                    width: 100%;
+                }
+                h1 {
+                    font-size: 1.5em;
+                }
+                .section-title {
+                    font-size: 1.1em;
+                    border-bottom: 1px solid #333;
+                }
+                .section-content {
+                    margin-left: 10px;
+                }
+                .contact-info, .section {
+                    margin-bottom: 10px;
+                }
+                ul {
+                    margin-left: 20px;
+                    padding-left: 0;
+                }
+                a {
+                    color: black;
+                    text-decoration: none;
+                }
+            }
         </style>
     </head>
     <body>
@@ -61,7 +94,7 @@
         <div class="section">
             <div class="section-title">Professional Summary</div>
             <div class="section-content">
-                <p>Experienced software developer with over 10 years of expertise in multiple programming languages, full stack development, Agile development processes, and team and solo development.</p>
+                <p>Experienced software developer with over 10 years of expertise in multiple programming languages, full stack development, Agile development processes, and team + solo development.</p>
             </div>
         </div>
 
@@ -84,7 +117,7 @@
                 </ul>
 
                 <p><strong>Stone Plastics & Manufacturing</strong> (2012 - 2021)</p>
-                <p class="subheader">Quality Technician, Software Developer</p>
+                <p class="subheader">Software Developer, Quality Technician</p>
                 <ul>
                     <li>Led projects like migrating work instructions to a paperless system and developing non-conformance software to track and manage product quality at the serial level.</li>
                     <li>Successfully migrated multiple internal systems to PostgreSQL and automated processes like time tracking and calibration management.</li>
@@ -104,5 +137,6 @@
                 <p>Phi Theta Kappa Honor Society Member</p>
             </div>
         </div>
+
     </body>
 </html>
