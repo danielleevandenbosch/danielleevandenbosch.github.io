@@ -8,12 +8,14 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: azure;
         }
         textarea {
             width: 100%;
             height: 100px;
             font-family: monospace;
             font-size: 14px;
+            background-color: aliceblue;
         }
         .output {
             margin-top: 20px;
@@ -24,6 +26,7 @@
         .cells {
             margin-top: 10px;
             font-size: 14px;
+            white-space: pre-line;
         }
     </style>
 </head>
@@ -51,7 +54,7 @@
             // Display the results
             const outputDiv = document.getElementById("cellOutput");
             outputDiv.innerHTML = uniqueCells.length > 0 
-                ? uniqueCells.join(", ") 
+                ? uniqueCells.join("<br>") 
                 : "No valid cell references found.";
         });
     </script>
