@@ -1,101 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formula Cell Extractor</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: darkred; 
-            color: white;
-        }
-        textarea {
-            width: 100%;
-            height: 100px;
-            font-family: monospace;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            border: none;
-            background-color: #005f9e;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #0077c8;
-        }
-        .output {
-            margin-top: 20px;
-        }
-        .output p {
-            font-weight: bold;
-        }
-        .cells {
-            margin-top: 10px;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Excel Formula Cell Extractor</h1>
-    <p>Enter your Excel formula in the textarea below:</p>
-    <textarea id="formulaInput" placeholder="Enter Excel formula here..."></textarea>
-    <button id="extractBtn">Extract Cells</button>
-    <div class="output">
-        <p>Extracted Cells:</p>
-        <div class="cells" id="cellOutput"></div>
-    </div>
-
-    <script>
-        document.getElementById("extractBtn").addEventListener("click", function () {
-            const formula = document.getElementById("formulaInput").value;
-
-            // Regex to match Excel cell references
-            const cellRegex = /\$?[A-Z]+\$?[0-9]+/g;
-            const matches = formula.match(cellRegex);
-
-            // Remove duplicates and sort
-            const uniqueCells = [...new Set(matches || [])].sort((a, b) => {
-                // Split into letter and number parts, considering $
-                const [, lettersA, numberA] = a.match(/(\$?[A-Z]+)(\$?[0-9]+)/);
-                const [, lettersB, numberB] = b.match(/(\$?[A-Z]+)(\$?[0-9]+)/);
-
-                // Determine if A and B are absolute references
-                const isAbsoluteA = lettersA.startsWith("$") || numberA.startsWith("$");
-                const isAbsoluteB = lettersB.startsWith("$") || numberB.startsWith("$");
-
-                // 1. Absolute references should appear before relative references
-                if (isAbsoluteA !== isAbsoluteB) {
-                    return isAbsoluteA ? -1 : 1;
-                }
-
-                // 2. Sort by letters alphabetically
-                const letterComparison = lettersA.replace(/\$/g, '').localeCompare(lettersB.replace(/\$/g, ''));
-                if (letterComparison !== 0) {
-                    return letterComparison;
-                }
-
-                // 3. Sort by numbers numerically, ignoring $
-                return parseInt(numberA.replace(/\$/g, '')) - parseInt(numberB.replace(/\$/g, ''));
-            });
-
-            // Display the results with checkboxes
-            const outputDiv = document.getElementById("cellOutput");
-            if (uniqueCells.length > 0) {
-                outputDiv.innerHTML = uniqueCells
-                    .map(cell => `<label><input type="checkbox" value="${cell}"> ${cell}</label>`)
-                    .join("<br>");
-            } else {
-                outputDiv.innerHTML = "No valid cell references found.";
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Extract Unique Cells</title>
+        <style>
+            /* General Body Styling */
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background: linear-gradient(135deg, #4facfe, #00f2fe);
+                color: #333;
             }
-        });
-    </script>
-</body>
+
+            /* Centered Container */
+            .container {
+                background: #fff;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+                border-radius: 10px;
+                padding: 20px;
+                width: 90%;
+                max-width: 600px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+                color: #333;
+                margin-bottom: 15px;
+            }
+
+            textarea {
+                width: 100%;
+                height: 100px;
+                font-family: monospace;
+                font-size: 14px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                resize: none;
+                box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            button {
+                margin-top: 15px;
+                padding: 10px 20px;
+                border: none;
+                background-color: #4facfe;
+                color: white;
+                font-size: 1rem;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            button:hover {
+                background-color: #00c3ff;
+            }
+
+            aside {
+                background: #f9f9f9;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-family: monospace;
+                overflow-x: auto;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                margin-top: 20px;
+            }
+
+            aside::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            aside::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Extract Unique Cells</h1>
+            <textarea id="formulaInput" placeholder="Enter your Excel formula here...">=IF(OR($C14="",SUM(N14:O14)=0),0,IF(V13=0,IF(AK14<>AK15,T14+$AZ$2,IF(AF14<>AF15,T14+$AZ$3,T14)),IF(SUM($N14:$O14)=0,0,IF(AK14<>AK15,V13+T14+$AZ$2,IF(AF14<>AF15,V13+T14+$AZ$3,V13+T14)))))</textarea>
+            <button id="extractBtn">Extract Cells</button>
+            <aside id="output"></aside>
+        </div>
+        <script>
+            document.getElementById("extractBtn").addEventListener
+            (
+                "click"
+            ,   function () 
+                {
+                    const formula = document.getElementById("formulaInput").value;
+
+                    // Regex to match Excel cell references
+                    const cellRegex = /\$?[A-Z]+\$?[0-9]+/g;
+                    const matches = formula.match(cellRegex);
+
+                    // Ensure uniqueness
+                    const uniqueCells = [...new Set(matches || [])];
+                    // modify the array values
+                    const modifiedCells = uniqueCells.map
+                    (
+                        (cell) => 
+                        {
+                            // if the cell starts with a $, append the end with a ^ to indicate absolute reference
+                            if (cell.startsWith("$")) 
+                            {
+                                cell = cell + "^";
+                                // delete the first character of the cell
+                                // this will remove the $ first character
+                                cell = cell.slice(1);
+                                
+                            } 
+                            // all cells should now start with 1 - 3 letters if it is 1 letter add %% to the begining of the cell
+                            // if it is 2 letters add % to the begining of the cell
+                            // if it is 3 letters do nothing
+                            // use regex to determine the number of letters
+                            const letterRegex = /[A-Z]+/g;
+                            const letters = cell.match(letterRegex)[0];
+                            if (letters.length === 1) 
+                            {
+                                cell = "%%" + cell;
+                            } 
+                            else if (letters.length === 2) 
+                            {
+                                cell = "%" + cell;
+                            }
+                            const numberRegex = /[0-9]+/g;
+                            const numbers = cell.match(numberRegex)[0];
+                            // determine if the cell is an absolute reference giving contains a $
+                            // if the cell is an absolute reference add a & to the end of the cell
+                            if (cell.includes("$")) 
+                            {
+                                cell = cell + "&";
+                                cell = cell.replace("$", "");
+                            }
+                            if (numbers.length === 1) 
+                            {
+                                // the number portion of the cell should be 7 digits long
+                                // it will start on the 4th character of the cell
+                                cell = cell.slice(0, 3) + "000000" + cell.slice(3);
+                            } 
+                            else if (numbers.length === 2) 
+                            {
+                                cell = cell.slice(0, 3) + "00000" + cell.slice(3);
+                            } 
+                            else if (numbers.length === 3) 
+                            {
+                                cell = cell.slice(0, 3) + "0000" + cell.slice(3);
+                            } 
+                            else if (numbers.length === 4) 
+                            {
+                                cell = cell.slice(0, 3) + "000" + cell.slice(3);
+                            } 
+                            else if (numbers.length === 5) 
+                            {
+                                cell = cell.slice(0, 3) + "00" + cell.slice(3);
+                            } 
+                            else if (numbers.length === 6) 
+                            {
+                                cell = cell.slice(0, 3) + "0" + cell.slice(3);
+                            }
+                            return cell;
+                        }
+                    );
+                    // now sort the array
+
+                    modifiedCells.sort();
+
+                    // now that we have sorted, we need to go through the array again, remove the % ^ & and put the $ back in and remove the extra leading 0s
+
+                    const finalCells = modifiedCells.map
+                    (
+                        (cell) => 
+                        {
+                            // if the cell contains a ^ put the $ back in by the  and remove the ^ from the end
+                            if (cell.includes("&")) 
+                            {
+                                // go to the 4th character of the cell and add a $
+                                cell = cell.slice(0, 3) + "$" + cell.slice(3);
+                                // remove the ^ from the end of the cell
+                                cell = cell.replace("&", "");
+                            }
+                            // if the cell contains a % remove the % from the beginning of the cell
+                            if (cell.includes("%")) 
+                            {
+                                cell = cell.replace("%", "");
+                                cell = cell.replace("%", "");
+                                cell = cell.replace("%", "");
+                            }
+                            if (cell.includes("^")) 
+                            {
+                                cell = "$" + cell.replace("^", "");
+                            }
+                            //check if the second character is a 0
+                            // loop each character in the cell
+                            let cell2 = "";
+                            let i_found_the_numbers = false;
+                            for (let i = 0; i < cell.length; i++) 
+                            {
+                                if (cell[i] === "0" && i_found_the_numbers === false) 
+                                {
+                                    // replace this specific character with an empty string
+                                    // do nothing
+                                }
+                                else if 
+                                (
+                                    cell[i] === "1" 
+                                ||  cell[i] === "2" 
+                                ||  cell[i] === "3" 
+                                ||  cell[i] === "4" 
+                                ||  cell[i] === "5" 
+                                ||  cell[i] === "6" 
+                                ||  cell[i] === "7" 
+                                ||  cell[i] === "8" 
+                                ||  cell[i] === "9"
+                                ) 
+                                {
+                                    i_found_the_numbers = true;
+                                    cell2 += cell[i];
+                                }
+                                else 
+                                {
+                                    cell2 +=  cell[i];
+                                }
+                            }
+                            
+                            return "<tr><td>" + cell2 + "</td><td><input type=\"checkbox\" title\"all done check box\"></td></tr>";
+                        }
+                    );
+                    document.getElementById("output").innerHTML = "<table>" + finalCells.join("") + "</table>";
+                }
+            );
+        </script>
+    </body>
 </html>
+
+
