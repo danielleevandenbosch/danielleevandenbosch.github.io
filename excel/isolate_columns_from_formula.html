@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formula Cell Extractor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .output {
+            margin-top: 20px;
+        }
+        .output p {
+            font-weight: bold;
+        }
+        .cells {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Excel Formula Cell Extractor</h1>
+    <p>Enter your Excel formula in the textarea below:</p>
+    <textarea id="formulaInput" placeholder="Enter Excel formula here..."></textarea>
+    <button id="extractBtn">Extract Cells</button>
+    <div class="output">
+        <p>Extracted Cells:</p>
+        <div class="cells" id="cellOutput"></div>
+    </div>
+
+    <script>
+        document.getElementById("extractBtn").addEventListener("click", function () {
+            const formula = document.getElementById("formulaInput").value;
+
+            // Regex to match Excel cell references
+            const cellRegex = /\$?[A-Z]+[0-9]+/g;
+            const matches = formula.match(cellRegex);
+
+            // Remove duplicates
+            const uniqueCells = [...new Set(matches || [])];
+
+            // Display the results
+            const outputDiv = document.getElementById("cellOutput");
+            outputDiv.innerHTML = uniqueCells.length > 0 
+                ? uniqueCells.join(", ") 
+                : "No valid cell references found.";
+        });
+    </script>
+</body>
+</html>
