@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: aquamarine;
+            background-color: darkred; 
             color: white;
         }
         textarea {
@@ -63,21 +63,26 @@
 
             // Remove duplicates and sort
             const uniqueCells = [...new Set(matches || [])].sort((a, b) => {
-                // Split into letter and number parts, while considering $
-                const [, lettersA, numberA] = a.match(/(\$?[A-Z]+)(\$?\d+)/);
-                const [, lettersB, numberB] = b.match(/(\$?[A-Z]+)(\$?\d+)/);
+                // Split into letter and number parts, considering $
+                const [, lettersA, numberA] = a.match(/(\$?[A-Z]+)(\$?[0-9]+)/);
+                const [, lettersB, numberB] = b.match(/(\$?[A-Z]+)(\$?[0-9]+)/);
 
-                // Custom sorting logic:
-                // 1. Prioritize shorter letter sequences (e.g., N, O over AF, AK)
-                // 2. Sort letters alphabetically
-                // 3. Sort numbers numerically
-                if (lettersA.length !== lettersB.length) {
-                    return lettersA.length - lettersB.length;
+                // Determine if A and B are absolute references
+                const isAbsoluteA = lettersA.startsWith("$") || numberA.startsWith("$");
+                const isAbsoluteB = lettersB.startsWith("$") || numberB.startsWith("$");
+
+                // 1. Absolute references should appear before relative references
+                if (isAbsoluteA !== isAbsoluteB) {
+                    return isAbsoluteA ? -1 : 1;
                 }
-                const letterComparison = lettersA.localeCompare(lettersB);
+
+                // 2. Sort by letters alphabetically
+                const letterComparison = lettersA.replace(/\$/g, '').localeCompare(lettersB.replace(/\$/g, ''));
                 if (letterComparison !== 0) {
                     return letterComparison;
                 }
+
+                // 3. Sort by numbers numerically, ignoring $
                 return parseInt(numberA.replace(/\$/g, '')) - parseInt(numberB.replace(/\$/g, ''));
             });
 
