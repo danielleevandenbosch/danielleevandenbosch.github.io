@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta name="description" content="Function Formatter">
+        <meta name="keywords" content="Function, Formatter">
+        <meta name="author" content="Daniel L. Van Den Bosch">
+        <meta name="robots" content="index, follow">
+        <title>Function Formatter</title>
+        <style>
+            body 
+            {
+                font-family: Arial, sans-serif;
+            }
+
+            #formattedCode 
+            {
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+                padding: 10px;
+                white-space: pre-wrap;
+                font-family: monospace;
+                counter-reset: line-numbering;
+            }
+
+            .line 
+            {
+                counter-increment: line-numbering;
+                display: block;
+            }
+
+            .line::before 
+            {
+                content: counter(line-numbering);
+                display: inline-block;
+                width: 30px;
+                margin-right: 10px;
+                color: gray;
+                text-align: right;
+            }
+
+            textarea 
+            {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            #copyMessage 
+            {
+                color: green;
+                font-weight: bold;
+                opacity: 0;
+                transition: opacity 0.5s ease-in-out;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Formatted Function Code</h2>
+        <input type="number" id="compressionCharacterLimit" placeholder="Enter the character limit for compression" min="0" max="2000" step="1" required value="15">
+        <textarea id="codeInput" rows="10" placeholder="Enter code here...">
+            =IF($A14="",IF(RIGHT($C13,1)="A",TRIM(LEFT($C11,LEN($C11)-1))&" "&"B", TRIM(LEFT($C11,LEN($C11)-1))&" "&"A"),OFFSET(TT_FG_DEMAND!$A$1,$A14,0))</textarea>
+        <button onclick="formatCode()" title="Click here to run the formatting algorithm">Format Code</button>
+        <button onclick="copyToClipboard()" title="Click here to copy">Copy to Clipboard</button>
+        <button onclick="clearCode()" title="Click here to clear all the code">Clear Code</button>
+        <div id="copyMessage">Formatted code copied to clipboard</div>
+        <pre id="formattedCode"></pre>
+        <script>
+            function formatCode()
+            {
+                let compress_small_statements = true;
+                let compression_character_limit = document.getElementById("compressionCharacterLimit").value;
+                if (compression_character_limit === "")
+                {
+                    compress_small_statements = false;
+                }
+                else
+                {
+                    compression_character_limit = parseInt(compression_character_limit);
+                }
+                if (compression_character_limit < 1)
+                {
+                    compress_small_statements = false;
+                }
+                let codeInput = document.getElementById("codeInput").value.trim();
+                if (!codeInput) 
+                {
+                    alert("Please enter a valid code");
+                    return;
+                }
+                // remove all new line characters and replace them with a space
+                codeInput = codeInput.replace(/\n/g, " ");
+                // replace all multiple spaces with a single space
+                codeInput = codeInput.replace(/\s+/g, " ");
+                // remove all spaces directly before and after a comma
+                codeInput = codeInput.replace(/,\s+/g, ",");
+                codeInput = codeInput.replace(/\s+,/g, ",");
+                // remove all spaces directly before and after an opening parenthesis
+                codeInput = codeInput.replace(/\(\s+/g, "(");
+                codeInput = codeInput.replace(/\s+\(/g, "(");
+                // remove all spaces directly before and after a closing parenthesis
+                codeInput = codeInput.replace(/\s+\)/g, ")");
+                codeInput = codeInput.replace(/\)\s+/g, ")");
+                // remove all spaces directly before and after an opening curly brace
+                codeInput = codeInput.replace(/\{\s+/g, "{");
+                codeInput = codeInput.replace(/\s+\{/g, "{");
+                // remove all spaces directly before and after a closing curly brace
+                codeInput = codeInput.replace(/\s+\}/g, "}");
+                codeInput = codeInput.replace(/\}\s+/g, "}");
+                // remove all spaces directly before and after an opening square bracket
+                codeInput = codeInput.replace(/\[\s+/g, "[");
+                codeInput = codeInput.replace(/\s+\[/g, "[");
+                // remove all spaces directly before and after a closing square bracket
+                codeInput = codeInput.replace(/\s+\]/g, "]");
+                codeInput = codeInput.replace(/\]\s+/g, "]");
+                
+                // loop every character in the codeInput
+                let formattedCode = "";
+                let indentLevel = 0;
+                for (let i = 0; i < codeInput.length; i++) 
+                {
+                    let char = codeInput[i];
+                    console.log(formattedCode);
+                    console.log(char);
+                    console.log(i);
+                    // if the first character is an = sign, add a new line immediately after it
+                    if (i === 0 && char === "=") 
+                    {
+                        formattedCode += char;
+                        formattedCode += "\n";
+                    }
+                    // if the character is a ( add a new line before it and after it and increase the indent level
+                    else if (char === "(" || char === "{" || char === "[") 
+                    {
+                        let does_closer_appear_within_next_x_chars = false;
+                        if (compress_small_statements === true) 
+                        {
+                            // check if the next 10 characters contain a closing parenthesis
+                            for (let j = i; j < i + compression_character_limit; j++) 
+                            {   
+                                // checking for nesting
+                                if ((codeInput[j] === "(" || codeInput[j] === "{" || codeInput[j] === "[") && j !== i)
+                                {
+                                    does_closer_appear_within_next_x_chars = false;
+                                    break;
+                                }
+                                if (codeInput[j] === ")" || codeInput[j] === "}" || codeInput[j] === "]") 
+                                {
+                                    does_closer_appear_within_next_x_chars = true;
+                                    // check how far we are then loop through the characters i + to j into the formatted code
+                                    for (let k = i; k <= j; k++) 
+                                    {
+                                        formattedCode += codeInput[k];
+                                    }
+                                    i = j;
+                                    break;
+                                }
+                            }
+                        }
+                        if (does_closer_appear_within_next_x_chars === false) 
+                        {
+                            formattedCode += "\n";
+                            if (indentLevel > 0) 
+                            {
+                                formattedCode += " ".repeat(indentLevel * 4);
+                            }
+                            
+                            formattedCode += char;
+                            formattedCode += "\n";
+                            indentLevel++;
+                            if (indentLevel > 0) 
+                            {
+                                formattedCode += " ".repeat(indentLevel * 4);
+                            }
+                        }
+                    }
+                    else if (char === ")" || char === "}" || char === "]") 
+                    {
+                        // decrease indent, close parenthesis
+                        formattedCode += "\n";
+                        indentLevel--;
+                        if (indentLevel > 0) 
+                        {
+                            formattedCode += " ".repeat(indentLevel * 4);
+                        }
+                        formattedCode += char;
+                        // check if the next character is a comma or another closer, if so do not add a new line
+                        if (codeInput[i + 1] !== "," && codeInput[i + 1] !== ")" && codeInput[i + 1] !== "}" && codeInput[i + 1] !== "]") 
+                        {
+                            formattedCode += "\n";
+                        }
+                        
+                        if (indentLevel > 0) 
+                        {
+                            formattedCode += " ".repeat(indentLevel * 4);
+                        }
+                    }
+                    // if it is a comma, add a new line before it followed by the indent level-1 and 3 spaces
+                    else if (char === ",") 
+                    {
+                        formattedCode += "\n";
+                        if (indentLevel > 0) 
+                        {
+                            formattedCode += " ".repeat((indentLevel-1) * 4);
+                        }
+                        formattedCode += char;
+                        formattedCode += "   ";
+                    }
+                    else 
+                    {
+                        formattedCode += char;
+                    }
+                }
+
+                // Add line numbers
+                const formattedWithLines = formattedCode.split("\n").map(line => `<span class="line">${line}</span>`).join("\n");
+
+                document.getElementById("formattedCode").innerHTML = formattedWithLines;
+            }
+
+            function copyToClipboard() 
+            {
+                const formattedCodeElement = document.getElementById("formattedCode");
+                navigator.clipboard.writeText(formattedCodeElement.textContent)
+                .then
+                (
+                    () => 
+                    {
+                        const copyMessage = document.getElementById("copyMessage");
+                        copyMessage.style.opacity = 1;
+                        setTimeout
+                        (
+                            () => 
+                            {
+                                copyMessage.style.opacity = 0;
+                            }
+                        ,   2000
+                        ); // Message fades out after 2 seconds
+                    }
+                )
+                .catch
+                (
+                    err => 
+                    {
+                        console.error("Error copying text: ", err);
+                    }
+                );
+            }
+            function clearCode()
+            {
+                document.getElementById("codeInput").value = "";
+                document.getElementById("formattedCode").textContent = "";
+            }
+        </script>
+    </body>
+</html>
