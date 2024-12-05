@@ -27,6 +27,10 @@
             border-radius: 5px;
             overflow-x: auto;
             font-size: 1rem;
+            position: relative;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
         }
         summary {
             cursor: pointer;
@@ -35,6 +39,21 @@
         }
         details {
             margin-bottom: 15px;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .copy-btn:hover {
+            background-color: #0056b3;
         }
         footer {
             margin-top: 20px;
@@ -57,6 +76,7 @@ RIGHT('foobar', 3); -- Result: "bar"
 -- Pervasive SQL Equivalent
 SELECT SUBSTRING('foobar', CHAR_LENGTH('foobar') - 3 + 1, 3); -- Result: "bar"
         </pre>
+        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
     </details>
 
     <details>
@@ -69,6 +89,7 @@ LEFT('foobar', 3); -- Result: "foo"
 -- Pervasive SQL Equivalent
 SELECT SUBSTRING('foobar', 1, 3); -- Result: "foo"
         </pre>
+        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
     </details>
 
     <details>
@@ -81,6 +102,7 @@ RPAD('foo', 5, ' ') -- Result: "foo  "
 -- Pervasive SQL Equivalent
 SELECT 'foo' || SPACE(5 - CHAR_LENGTH('foo')); -- Result: "foo  "
         </pre>
+        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
     </details>
 
     <details>
@@ -93,6 +115,7 @@ LPAD('foo', 5, ' ') -- Result: "  foo"
 -- Pervasive SQL Equivalent
 SELECT SPACE(5 - CHAR_LENGTH('foo')) || 'foo'; -- Result: "  foo"
         </pre>
+        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
     </details>
 
     <details>
@@ -105,6 +128,7 @@ TRIM('  foo  ') -- Result: "foo"
 -- Pervasive SQL Equivalent
 SELECT RTRIM(LTRIM('  foo  ')); -- Result: "foo"
         </pre>
+        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
     </details>
 
     <details>
@@ -115,12 +139,34 @@ SELECT RTRIM(LTRIM('  foo  ')); -- Result: "foo"
 SELECT 'foo' || 'bar'; -- Result: "foobar"
 
 -- Pervasive SQL Equivalent
-SELECT 'foo' + 'bar'; -- Result: "foobar"
+SELECT 'foo' || 'bar'; -- Result: "foobar"
         </pre>
+        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
     </details>
 
     <footer>
         &copy; 2024 Postgres to Pervasive Conversion Guide. All rights reserved.
     </footer>
+
+    <script>
+        function copyToClipboard(button) {
+            // Find the <pre> element that is a sibling of the clicked button
+            const pre = button.previousElementSibling;
+            // Get the text content of the <pre> element
+            const code = pre.textContent;
+            // Create a temporary textarea to copy the text
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            // Provide feedback to the user
+            button.textContent = 'Copied!';
+            setTimeout(() => {
+                button.textContent = 'Copy';
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
