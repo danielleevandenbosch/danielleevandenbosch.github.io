@@ -99,7 +99,7 @@ SELECT SUBSTRING('foobar', 1, 3); -- Result: "foo"
 RPAD('foo', 5, ' ') -- Result: "foo  "
 
 -- Pervasive SQL Equivalent
-SELECT 'foo' || SPACE(5 - CHAR_LENGTH('foo')); -- Result: "foo  "
+SELECT 'foo' + SPACE(5 - CHAR_LENGTH('foo')); -- Result: "foo  "
         </pre>
     </details>
 
@@ -111,7 +111,7 @@ SELECT 'foo' || SPACE(5 - CHAR_LENGTH('foo')); -- Result: "foo  "
 LPAD('foo', 5, ' ') -- Result: "  foo"
 
 -- Pervasive SQL Equivalent
-SELECT SPACE(5 - CHAR_LENGTH('foo')) || 'foo'; -- Result: "  foo"
+SELECT SPACE(5 - CHAR_LENGTH('foo')) + 'foo'; -- Result: "  foo"
         </pre>
     </details>
 
