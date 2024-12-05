@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL to Pervasive SQL Conversion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #555;
+        }
+        p {
+            color: #444;
+        }
+        pre {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 1rem;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        details {
+            margin-bottom: 15px;
+        }
+        footer {
+            margin-top: 20px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>PostgreSQL to Pervasive SQL Conversion Guide</h1>
+    <p>This guide explains how to convert PostgreSQL queries and functions to Pervasive SQL syntax with examples and workarounds for unsupported functions.</p>
+
+    <details>
+        <summary>1. Simulating RIGHT</summary>
+        <p>In PostgreSQL, the <code>RIGHT</code> function extracts the last <span class="highlight">n</span> characters of a string. Pervasive SQL does not support <code>RIGHT</code>, but it can be simulated with <code>SUBSTRING</code> and <code>CHAR_LENGTH</code>:</p>
+        <pre class="example">
+-- PostgreSQL
+RIGHT('foobar', 3); -- Result: "bar"
+
+-- Pervasive SQL Equivalent
+SELECT SUBSTRING('foobar', CHAR_LENGTH('foobar') - 3 + 1, 3); -- Result: "bar"
+        </pre>
+    </details>
+
+    <details>
+        <summary>2. Simulating LEFT</summary>
+        <p>In PostgreSQL, the <code>LEFT</code> function extracts the first <span class="highlight">n</span> characters of a string. In Pervasive SQL, use <code>SUBSTRING</code> with a fixed starting position:</p>
+        <pre class="example">
+-- PostgreSQL
+LEFT('foobar', 3); -- Result: "foo"
+
+-- Pervasive SQL Equivalent
+SELECT SUBSTRING('foobar', 1, 3); -- Result: "foo"
+        </pre>
+    </details>
+
+    <details>
+        <summary>3. Simulating RPAD</summary>
+        <p>The <code>RPAD</code> function pads a string to the right with a specified character. Pervasive SQL does not support <code>RPAD</code>, but it can be simulated with <code>SPACE</code> and concatenation:</p>
+        <pre class="example">
+-- PostgreSQL
+RPAD('foo', 5, ' ') -- Result: "foo  "
+
+-- Pervasive SQL Equivalent
+SELECT 'foo' || SPACE(5 - CHAR_LENGTH('foo')); -- Result: "foo  "
+        </pre>
+    </details>
+
+    <details>
+        <summary>4. Simulating LPAD</summary>
+        <p>The <code>LPAD</code> function pads a string to the left with a specified character. Pervasive SQL does not support <code>LPAD</code>, but it can be simulated by concatenating spaces and the original string:</p>
+        <pre class="example">
+-- PostgreSQL
+LPAD('foo', 5, ' ') -- Result: "  foo"
+
+-- Pervasive SQL Equivalent
+SELECT SPACE(5 - CHAR_LENGTH('foo')) || 'foo'; -- Result: "  foo"
+        </pre>
+    </details>
+
+    <details>
+        <summary>5. Simulating TRIM</summary>
+        <p>Pervasive SQL supports <code>LTRIM</code> and <code>RTRIM</code> but not <code>TRIM</code>. To remove whitespace from both sides of a string, use a combination of <code>LTRIM</code> and <code>RTRIM</code>:</p>
+        <pre class="example">
+-- PostgreSQL
+TRIM('  foo  ') -- Result: "foo"
+
+-- Pervasive SQL Equivalent
+SELECT RTRIM(LTRIM('  foo  ')); -- Result: "foo"
+        </pre>
+    </details>
+
+    <details>
+        <summary>6. Simulating Concatenation</summary>
+        <p>Pervasive SQL uses <code>||</code> for concatenation, which is the same as PostgreSQL. Here's an example:</p>
+        <pre class="example">
+-- PostgreSQL
+SELECT 'foo' || 'bar'; -- Result: "foobar"
+
+-- Pervasive SQL Equivalent
+SELECT 'foo' + 'bar'; -- Result: "foobar"
+        </pre>
+    </details>
+
+    <footer>
+        &copy; 2024 Postgres to Pervasive Conversion Guide. All rights reserved.
+    </footer>
+</body>
+</html>
