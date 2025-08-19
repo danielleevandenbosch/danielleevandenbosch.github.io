@@ -64,6 +64,7 @@
         <button onclick="formatCode()" title="Click here to run the formatting algorithm">Format Code</button>
         <button onclick="copyToClipboard()" title="Click here to copy">Copy to Clipboard</button>
         <button onclick="clearCode()" title="Click here to clear all the code">Clear Code</button>
+        <button onclick="pasteCode()" title="Click here to paste code from your clipboard">Paste</button>
         <div id="copyMessage">Formatted code copied to clipboard</div>
         <pre id="formattedCode"></pre>
         <script>
@@ -251,6 +252,21 @@
             {
                 document.getElementById("codeInput").value = "";
                 document.getElementById("formattedCode").textContent = "";
+            }
+            async function pasteCode() 
+            {
+                try 
+                {
+                    // Read text from the clipboard
+                    const text = await navigator.clipboard.readText();
+
+                    // Paste into the textarea
+                    document.getElementById("codeInput").value = text;
+                } 
+                catch (err) 
+                {
+                    console.error("Failed to read clipboard: ", err);
+                }
             }
         </script>
     </body>
