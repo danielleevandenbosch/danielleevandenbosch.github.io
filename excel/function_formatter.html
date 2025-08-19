@@ -59,6 +59,10 @@
     <body>
         <h2>Formatted Function Code</h2>
         <input type="number" id="compressionCharacterLimit" placeholder="Enter the character limit for compression" min="0" max="2000" step="1" required value="15">
+        <label title="Move newline from before ; to after ;">
+            <input type="checkbox" id="moveSemicolonNewlines" checked>
+            Move newline before “;” to after “;”
+        </label>
         <textarea id="codeInput" rows="10" placeholder="Enter code here...">
             =IF($A14="",IF(RIGHT($C13,1)="A",TRIM(LEFT($C11,LEN($C11)-1))&" "&"B", TRIM(LEFT($C11,LEN($C11)-1))&" "&"A"),OFFSET(TT_FG_DEMAND!$A$1,$A14,0))</textarea>
         <button onclick="formatCode()" title="Click here to run the formatting algorithm">Format Code</button>
@@ -214,6 +218,17 @@
                     }
                 }
 
+
+
+                // Optional semicolon newline shift
+                const doMove = document.getElementById("moveSemicolonNewlines").checked;
+                if (doMove)
+                {
+                    formattedCode = moveSemicolonNewlines
+                    (
+                        formattedCode
+                    );
+                }
                 // Add line numbers
                 const formattedWithLines = formattedCode.split("\n").map(line => `<span class="line">${line}</span>`).join("\n");
 
@@ -267,6 +282,16 @@
                 {
                     console.error("Failed to read clipboard: ", err);
                 }
+            }
+            function moveSemicolonNewlines
+            (
+                text
+            )
+            {
+                // If the character *behind* ';' is a newline, swap positions:
+                // "\n;   X"  -->  ";\n   X"
+                // Keeps whatever spaces were after the semicolon on the next line.
+                return text.replace(/\r?\n;(\s*)/g, ";\n$1");
             }
         </script>
     </body>
