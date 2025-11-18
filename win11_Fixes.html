@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 11 Fixer & Optimizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%), 
+                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%), 
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.15) 0px, transparent 50%), 
+                radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            background: rgba(30, 41, 59, 0.85);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Selection Color */
+        ::selection {
+            background: #38bdf8;
+            color: #000;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="glass-card px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 border-l-4 border-green-400">
+            <i class="fas fa-check-circle text-green-400"></i>
+            <span class="font-semibold">Copied to Clipboard!</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="pt-12 pb-8 px-4 text-center">
+        <div class="inline-block mb-4 p-3 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 backdrop-blur-sm">
+            <i class="fab fa-windows text-4xl text-blue-400"></i>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 mb-3">
+            Win11 Fixer
+        </h1>
+        <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+            A curated collection of commands, registry hacks, and settings to tame Windows 11, restore classic functionality, and improve performance.
+        </p>
+    </header>
+
+    <!-- Controls -->
+    <div class="container mx-auto px-4 max-w-6xl sticky top-2 z-30">
+        <div class="glass-card rounded-xl p-4 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between shadow-2xl">
+            <!-- Search -->
+            <div class="relative w-full md:w-1/3">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Search fixes (e.g. 'Context Menu')..." 
+                    class="w-full bg-slate-900/50 border border-slate-700 rounded-lg py-2 pl-10 pr-4 text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-500">
+            </div>
+
+            <!-- Categories -->
+            <div class="flex flex-wrap gap-2 justify-center w-full md:w-auto" id="categoryContainer">
+                <button data-cat="all" class="category-btn active px-4 py-1.5 rounded-full border border-slate-700 text-sm font-medium hover:bg-slate-800 transition-colors">All</button>
+                <button data-cat="ui" class="category-btn px-4 py-1.5 rounded-full border border-slate-700 text-sm font-medium hover:bg-slate-800 transition-colors">Interface</button>
+                <button data-cat="performance" class="category-btn px-4 py-1.5 rounded-full border border-slate-700 text-sm font-medium hover:bg-slate-800 transition-colors">Performance</button>
+                <button data-cat="privacy" class="category-btn px-4 py-1.5 rounded-full border border-slate-700 text-sm font-medium hover:bg-slate-800 transition-colors">Privacy</button>
+                <button data-cat="system" class="category-btn px-4 py-1.5 rounded-full border border-slate-700 text-sm font-medium hover:bg-slate-800 transition-colors">System</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Content -->
+    <main class="container mx-auto px-4 max-w-6xl flex-grow pb-12">
+        <div id="fixGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cards will be injected here by JS -->
+        </div>
+        
+        <!-- No Results State -->
+        <div id="noResults" class="hidden text-center py-20">
+            <div class="text-6xl mb-4">😕</div>
+            <h3 class="text-xl font-bold text-slate-300">No fixes found</h3>
+            <p class="text-slate-500">Try a different search term or category.</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 mt-auto bg-slate-900/50 backdrop-blur-md">
+        <div class="container mx-auto px-4 py-8 text-center">
+            <p class="text-slate-500 text-sm">
+                <i class="fas fa-exclamation-triangle text-yellow-500 mr-1"></i> 
+                Disclaimer: Modifying the registry involves risk. Always create a System Restore point before applying these fixes.
+            </p>
+            <p class="text-slate-600 text-xs mt-2">Generated by Gemini AI</p>
+        </div>
+    </footer>
+
+    <script>
+        // Fix Database
+        const fixes = [
+            {
+                id: 1,
+                title: "Restore Classic Context Menu",
+                desc: "Get the full Windows 10 right-click menu back without clicking 'Show more options'.",
+                category: "ui",
+                icon: "fa-mouse-pointer",
+                type: "command",
+                lang: "cmd",
+                code: 'reg.exe add "HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32" /f /ve',
+                instruction: "Run in Command Prompt (Admin), then restart PC."
+            },
+            {
+                id: 2,
+                title: "Align Taskbar to Left",
+                desc: "Move the Start button and icons to the left corner like older Windows versions.",
+                category: "ui",
+                icon: "fa-align-left",
+                type: "manual",
+                instruction: "Go to Settings > Personalization > Taskbar > Taskbar behaviors > Set 'Taskbar alignment' to Left."
+            },
+            {
+                id: 3,
+                title: "Disable Web Search in Start",
+                desc: "Stop Bing search results from appearing when you search for files in the Start Menu.",
+                category: "privacy",
+                icon: "fa-search-minus",
+                type: "command",
+                lang: "cmd",
+                code: 'reg add "HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer" /v "DisableSearchBoxSuggestions" /t REG_DWORD /d 1 /f',
+                instruction: "Run in Command Prompt (Admin), then restart Explorer."
+            },
+            {
+                id: 4,
+                title: "Repair System Files (SFC)",
+                desc: "Scan and fix corrupted Windows system files that might be causing crashes.",
+                category: "system",
+                icon: "fa-heartbeat",
+                type: "command",
+                lang: "cmd",
+                code: "sfc /scannow",
+                instruction: "Run in Command Prompt (Admin). Wait for it to reach 100%."
+            },
+            {
+                id: 5,
+                title: "Restore Health (DISM)",
+                desc: "Use Windows Update to fix the System Image if SFC fails.",
+                category: "system",
+                icon: "fa-tools",
+                type: "command",
+                lang: "cmd",
+                code: "DISM /Online /Cleanup-Image /RestoreHealth",
+                instruction: "Run in Command Prompt (Admin). Requires Internet."
+            },
+            {
+                id: 6,
+                title: "Flush DNS Cache",
+                desc: "Fixes internet connectivity issues and clears bad address records.",
+                category: "system",
+                icon: "fa-wifi",
+                type: "command",
+                lang: "cmd",
+                code: "ipconfig /flushdns",
+                instruction: "Run in Command Prompt."
+            },
+            {
+                id: 7,
+                title: "Disable Startup Apps",
+                desc: "Speed up boot time by disabling apps that launch automatically.",
+                category: "performance",
+                icon: "fa-tachometer-alt",
+                type: "manual",
+                instruction: "Right-click Taskbar > Task Manager > Startup Apps (Gauge icon). Right-click apps and select 'Disable'."
+            },
+            {
+                id: 8,
+                title: "Restart Windows Explorer",
+                desc: "Quick fix for a frozen taskbar or missing desktop icons.",
+                category: "system",
+                icon: "fa-redo",
+                type: "command",
+                lang: "cmd",
+                code: "taskkill /f /im explorer.exe & start explorer.exe",
+                instruction: "Run in Command Prompt to instantly refresh the UI."
+            },
+            {
+                id: 9,
+                title: "Debloat: Remove Co-Pilot",
+                desc: "Disable the AI Co-Pilot button on the taskbar (Policy tweak).",
+                category: "ui",
+                icon: "fa-robot",
+                type: "command",
+                lang: "cmd",
+                code: 'reg add "HKCU\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d 1 /f',
+                instruction: "Run in CMD (Admin). Restart required."
+            },
+            {
+                id: 10,
+                title: "Disable Mouse Acceleration",
+                desc: "Get consistent mouse movement for better muscle memory (gaming/productivity).",
+                category: "performance",
+                icon: "fa-mouse",
+                type: "manual",
+                instruction: "Settings > Bluetooth & devices > Mouse > Additional mouse settings > Pointer Options > Uncheck 'Enhance pointer precision'."
+            },
+            {
+                id: 11,
+                title: "Disable Widget Service",
+                desc: "Stop the Widgets background process to save RAM and CPU.",
+                category: "performance",
+                icon: "fa-newspaper",
+                type: "command",
+                lang: "powershell",
+                code: 'Get-AppxPackage *WebExperience* | Remove-AppxPackage',
+                instruction: "Run in PowerShell (Admin). Removes the Widgets feature."
+            },
+            {
+                id: 12,
+                title: "Show Hidden Files",
+                desc: "Toggle visibility of hidden system files and folders.",
+                category: "ui",
+                icon: "fa-eye",
+                type: "command",
+                lang: "cmd",
+                code: 'reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced" /v "Hidden" /t REG_DWORD /d 1 /f',
+                instruction: "Set 1 to show, 2 to hide. Restart Explorer to apply."
+            }
+        ];
+
+        const fixGrid = document.getElementById('fixGrid');
+        const searchInput = document.getElementById('searchInput');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const noResults = document.getElementById('noResults');
+        let currentCategory = 'all';
+
+        // Render Cards
+        function renderFixes(filterText = '') {
+            fixGrid.innerHTML = '';
+            let count = 0;
+
+            fixes.forEach((fix, index) => {
+                // Filter Logic
+                const matchesSearch = fix.title.toLowerCase().includes(filterText.toLowerCase()) || 
+                                      fix.desc.toLowerCase().includes(filterText.toLowerCase());
+                const matchesCat = currentCategory === 'all' || fix.category === currentCategory;
+
+                if (matchesSearch && matchesCat) {
+                    count++;
+                    const delay = index * 50; // Stagger animation
+                    
+                    const card = document.createElement('div');
+                    card.className = `glass-card rounded-xl p-6 flex flex-col h-full animate-fade-in`;
+                    card.style.animationDelay = `${delay}ms`;
+
+                    let contentHTML = '';
+                    
+                    if (fix.type === 'command') {
+                        contentHTML = `
+                            <div class="code-block rounded p-3 text-xs md:text-sm text-blue-300 mb-3 break-all relative group">
+                                ${fix.code}
+                                <button onclick="copyToClipboard('${fix.code.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')" 
+                                    class="absolute top-2 right-2 bg-slate-700 hover:bg-blue-600 text-white p-1.5 rounded text-xs transition-colors opacity-0 group-hover:opacity-100" title="Copy Code">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="mt-auto flex gap-2">
+                                <button onclick="copyToClipboard('${fix.code.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')" 
+                                    class="flex-1 bg-slate-700 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-terminal"></i> Copy Command
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        contentHTML = `
+                            <div class="bg-slate-800/50 rounded p-3 text-sm text-slate-300 mb-3 mt-auto border border-slate-700/50">
+                                <i class="fas fa-info-circle mr-2 text-blue-400"></i> ${fix.instruction}
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="p-3 rounded-lg bg-slate-800 text-blue-400 border border-slate-700">
+                                <i class="fas ${fix.icon} text-xl"></i>
+                            </div>
+                            <span class="px-2 py-1 rounded text-xs font-bold uppercase tracking-wider ${getCatColor(fix.category)} bg-opacity-20 border border-opacity-20">
+                                ${fix.category}
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-slate-100">${fix.title}</h3>
+                        <p class="text-slate-400 text-sm mb-4 flex-grow">${fix.desc}</p>
+                        ${contentHTML}
+                    `;
+
+                    fixGrid.appendChild(card);
+                }
+            });
+
+            if (count === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
+
+        // Helper for category badges
+        function getCatColor(cat) {
+            switch(cat) {
+                case 'ui': return 'text-pink-400 bg-pink-400 border-pink-400';
+                case 'performance': return 'text-green-400 bg-green-400 border-green-400';
+                case 'privacy': return 'text-red-400 bg-red-400 border-red-400';
+                case 'system': return 'text-blue-400 bg-blue-400 border-blue-400';
+                default: return 'text-slate-400';
+            }
+        }
+
+        // Search Listener
+        searchInput.addEventListener('input', (e) => {
+            renderFixes(e.target.value);
+        });
+
+        // Category Logic
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                // Add to clicked
+                btn.classList.add('active');
+                currentCategory = btn.dataset.cat;
+                renderFixes(searchInput.value);
+            });
+        });
+
+        // Clipboard Function
+        function copyToClipboard(text) {
+            // Create temporary element
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                console.error('Failed to copy', err);
+                alert("Failed to copy. Please select the text manually.");
+            }
+            
+            document.body.removeChild(textarea);
+        }
+
+        // Toast Notification
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+        }
+
+        // Init
+        renderFixes();
+
+    </script>
+</body>
+</html>
