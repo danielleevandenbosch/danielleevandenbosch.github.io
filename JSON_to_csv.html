@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Extract Column Names → CSV</title>
+    <style>
+        body
+        {
+            font-family: system-ui, sans-serif;
+            margin: 16px;
+            max-width: 1100px;
+        }
+        textarea
+        {
+            width: 100%;
+            height: 360px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 13px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        button
+        {
+            padding: 10px 14px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .row
+        {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        #out
+        {
+            height: 120px;
+        }
+        .hint
+        {
+            color: #555;
+            font-size: 13px;
+            margin: 6px 0 0;
+        }
+        .error
+        {
+            color: #b00020;
+            white-space: pre-wrap;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Extract SSIS Column Names → CSV</h2>
+
+<textarea id="in" spellcheck="false" placeholder="Paste your JSON here..."></textarea>
+
+<div class="row">
+    <button id="btn">Extract CSV</button>
+    <button id="btnCopy">Copy Output</button>
+    <label>
+        <input type="checkbox" id="dedupe" checked />
+        de-duplicate
+    </label>
+    <label>
+        <input type="checkbox" id="sort" />
+        sort A→Z
+    </label>
+</div>
+
+<div class="hint">Output:</div>
+<textarea id="out" spellcheck="false" readonly></textarea>
+
+<div id="err" class="error"></div>
+
+<script>
+(function ()
+{
+    const $in      = document.getElementById("in");
+    const $out     = document.getElementById("out");
+    const $err     = document.getElementById("err");
+    const $dedupe  = document.getElementById("dedupe");
+    const $sort    = document.getElementById("sort");
+    const $btn     = document.getElementById("btn");
+    const $btnCopy = document.getElementById("btnCopy");
+
+    function fail(msg)
+    {
+        $err.textContent = msg;
+    }
+
+    function ok()
+    {
+        $err.textContent = "";
+    }
+
+    function extractNames(obj)
+    {
+        // Accept either:
+        // - { Columns: [ { Name: "..." }, ... ] }
+        // - [ { Name: "..." }, ... ]
+        // - Any object that contains a "Columns" array somewhere shallow
+        let cols = null;
+
+        if (Array.isArray(obj))
+        {
+            cols = obj;
+        }
+        else if (obj && typeof obj === "object")
+        {
+            if (Array.isArray(obj.Columns))
+            {
+                cols = obj.Columns;
+            }
+            else
+            {
+                // Try a shallow scan for a Columns array (in case you pasted a larger wrapper)
+                for (const k of Object.keys(obj))
+                {
+                    if (k.toLowerCase() === "columns" && Array.isArray(obj[k]))
+                    {
+                        cols = obj[k];
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!cols)
+        {
+            throw new Error('Could not find an array named "Columns".');
+        }
+
+        const names = [];
+        for (const c of cols)
+        {
+            if (!c || typeof c !== "object")
+            {
+                continue;
+            }
+
+            // Your JSON uses "Name"
+            const n = c.Name ?? c.name;
+            if (typeof n === "string" && n.trim() !== "")
+            {
+                names.push(n.trim());
+            }
+        }
+
+        if (names.length === 0)
+        {
+            throw new Error('Found "Columns", but no usable "Name" fields inside it.');
+        }
+
+        return names;
+    }
+
+    function toCsv(names)
+    {
+        // If any name contains commas/quotes/newlines, quote it (RFC-ish)
+        return names.map
+        (
+            (n) =>
+            {
+                if (/[",\n\r]/.test(n))
+                {
+                    return '"' + n.replace(/"/g, '""') + '"';
+                }
+                return n;
+            }
+        ).join(",");
+    }
+
+    function run()
+    {
+        ok();
+        $out.value = "";
+
+        const raw = $in.value.trim();
+        if (!raw)
+        {
+            fail("Paste JSON into the top box first.");
+            return;
+        }
+
+        try
+        {
+            const parsed = JSON.parse(raw);
+
+            let names = extractNames(parsed);
+
+            if ($dedupe.checked)
+            {
+                const seen = new Set();
+                names = names.filter
+                (
+                    (n) =>
+                    {
+                        const key = n.toUpperCase();
+                        if (seen.has(key)) return false;
+                        seen.add(key);
+                        return true;
+                    }
+                );
+            }
+
+            if ($sort.checked)
+            {
+                names.sort
+                (
+                    (a, b) => a.localeCompare(b)
+                );
+            }
+
+            $out.value = toCsv(names);
+        }
+        catch (e)
+        {
+            fail(String(e && e.message ? e.message : e));
+        }
+    }
+
+    async function copyOut()
+    {
+        ok();
+        try
+        {
+            await navigator.clipboard.writeText($out.value || "");
+        }
+        catch
+        {
+            // Fallback
+            $out.focus();
+            $out.select();
+            document.execCommand("copy");
+        }
+    }
+
+    $btn.addEventListener("click", run);
+    $btnCopy.addEventListener("click", copyOut);
+
+    // Convenience: Ctrl+Enter to run
+    $in.addEventListener
+    (
+        "keydown"
+    ,   (e) =>
+        {
+            if (e.ctrlKey && e.key === "Enter")
+            {
+                run();
+            }
+        }
+    );
+})();
+</script>
+
+</body>
+</html>
