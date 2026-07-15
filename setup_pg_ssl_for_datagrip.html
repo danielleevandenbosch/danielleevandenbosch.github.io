@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Passwordless PostgreSQL SSL Authentication from DataGrip</title>
+    <style>
+        :root
+        {
+            color-scheme: light dark;
+            --bg: #f5f7fa;
+            --panel: #ffffff;
+            --text: #1f2933;
+            --muted: #5f6b7a;
+            --border: #d8dee6;
+            --accent: #22577a;
+            --accent-soft: #e8f1f7;
+            --warning: #8a4b08;
+            --warning-bg: #fff4df;
+            --success: #17633a;
+            --success-bg: #e8f6ee;
+            --code-bg: #111827;
+            --code-text: #f9fafb;
+        }
+
+        @media (prefers-color-scheme: dark)
+        {
+            :root
+            {
+                --bg: #111827;
+                --panel: #1f2937;
+                --text: #f3f4f6;
+                --muted: #c5ccd6;
+                --border: #46515f;
+                --accent: #8ecae6;
+                --accent-soft: #203747;
+                --warning: #ffd08a;
+                --warning-bg: #4b351c;
+                --success: #a7e8bd;
+                --success-bg: #173c29;
+                --code-bg: #080c12;
+                --code-text: #f9fafb;
+            }
+        }
+
+        *
+        {
+            box-sizing: border-box;
+        }
+
+        body
+        {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", Arial, sans-serif;
+            line-height: 1.55;
+        }
+
+        main
+        {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 40px 22px 80px;
+        }
+
+        article
+        {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+            overflow: hidden;
+        }
+
+        header
+        {
+            padding: 34px 38px 28px;
+            background: linear-gradient(135deg, var(--accent-soft), transparent);
+            border-bottom: 1px solid var(--border);
+        }
+
+        section
+        {
+            padding: 28px 38px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        section:last-child
+        {
+            border-bottom: 0;
+        }
+
+        h1
+        {
+            margin: 0 0 10px;
+            font-size: clamp(1.9rem, 4vw, 2.8rem);
+            line-height: 1.15;
+        }
+
+        h2
+        {
+            margin: 0 0 14px;
+            font-size: 1.45rem;
+            color: var(--accent);
+        }
+
+        h3
+        {
+            margin-top: 24px;
+            margin-bottom: 10px;
+            font-size: 1.08rem;
+        }
+
+        p
+        {
+            margin: 10px 0;
+        }
+
+        code
+        {
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        pre
+        {
+            overflow-x: auto;
+            padding: 16px 18px;
+            margin: 14px 0;
+            border-radius: 9px;
+            background: var(--code-bg);
+            color: var(--code-text);
+            font-family: Consolas, "Courier New", monospace;
+            line-height: 1.45;
+            white-space: pre;
+        }
+
+        .note,
+        .warning,
+        .success
+        {
+            padding: 14px 16px;
+            margin: 16px 0;
+            border-radius: 9px;
+            border-left: 5px solid;
+        }
+
+        .note
+        {
+            background: var(--accent-soft);
+            border-left-color: var(--accent);
+        }
+
+        .warning
+        {
+            background: var(--warning-bg);
+            color: var(--warning);
+            border-left-color: var(--warning);
+        }
+
+        .success
+        {
+            background: var(--success-bg);
+            color: var(--success);
+            border-left-color: var(--success);
+        }
+
+        .toc a
+        {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .toc a:hover
+        {
+            text-decoration: underline;
+        }
+
+        ul,
+        ol
+        {
+            padding-left: 24px;
+        }
+
+        li
+        {
+            margin: 7px 0;
+        }
+
+        table
+        {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th,
+        td
+        {
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th
+        {
+            background: var(--accent-soft);
+        }
+
+        .small
+        {
+            color: var(--muted);
+            font-size: .93rem;
+        }
+
+        .checklist
+        {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li::before
+        {
+            content: "☐";
+            margin-right: 10px;
+            color: var(--accent);
+        }
+
+        footer
+        {
+            padding: 24px 38px 32px;
+            color: var(--muted);
+            font-size: .92rem;
+        }
+
+        @media print
+        {
+            body
+            {
+                background: #fff;
+            }
+
+            main
+            {
+                max-width: none;
+                padding: 0;
+            }
+
+            article
+            {
+                box-shadow: none;
+                border: 0;
+            }
+
+            section,
+            header,
+            footer
+            {
+                break-inside: avoid;
+            }
+
+            pre
+            {
+                white-space: pre-wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+<main>
+<article>
+<header>
+    <h1>Passwordless PostgreSQL SSL Authentication from DataGrip</h1>
+    <p>Windows DataGrip client → PostgreSQL 16.14 on Ubuntu at <code>172.25.0.16</code></p>
+    <p>PostgreSQL role: <code>qs4rw</code> · Windows client IP: <code>172.25.2.38</code></p>
+</header>
+
+<section class="toc">
+    <h2>What this setup does</h2>
+    <p>This configures PostgreSQL client-certificate authentication. DataGrip presents a certificate whose identity is <code>qs4rw</code>, and PostgreSQL accepts it without requesting the PostgreSQL password.</p>
+    <div class="note">
+        SSH and PostgreSQL authentication are separate. An SSH key only removes the SSH password. The steps below use PostgreSQL SSL client certificates so the database itself can authenticate without a password.
+    </div>
+    <ol>
+        <li><a href="#paths">Confirm PostgreSQL paths</a></li>
+        <li><a href="#certs">Create the CA, server certificate, and client certificate</a></li>
+        <li><a href="#install">Install certificates and enable PostgreSQL SSL</a></li>
+        <li><a href="#hba">Add the certificate rule to pg_hba.conf</a></li>
+        <li><a href="#copy">Copy client files to Windows</a></li>
+        <li><a href="#datagrip">Configure DataGrip</a></li>
+        <li><a href="#verify">Verify the connection</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+    </ol>
+</section>
+
+<section id="paths">
+    <h2>1. Confirm PostgreSQL configuration paths</h2>
+    <p>Connect to the Linux server using your normal Linux account:</p>
+<pre>ssh danv@172.25.0.16</pre>
+
+    <p>Open PostgreSQL as the local <code>postgres</code> operating-system account:</p>
+<pre>sudo -u postgres psql -X -d postgres</pre>
+
+    <p>Run:</p>
+<pre>SELECT
+    current_setting('config_file') AS config_file
+,   current_setting('hba_file') AS hba_file
+,   current_setting('data_directory') AS data_directory
+,   version();</pre>
+
+    <p>For this server, the returned paths were:</p>
+<pre>/etc/postgresql/16/main/postgresql.conf
+/etc/postgresql/16/main/pg_hba.conf
+/var/lib/postgresql/16/main</pre>
+
+    <p>Exit psql:</p>
+<pre>\q</pre>
+</section>
+
+<section id="certs">
+    <h2>2. Create certificates on Linux</h2>
+
+    <h3>Create a protected workspace</h3>
+<pre>sudo -i
+mkdir -p /root/postgres-cert-setup
+chmod 700 /root/postgres-cert-setup
+cd /root/postgres-cert-setup</pre>
+
+    <h3>Create the private certificate authority</h3>
+<pre>openssl genpkey \
+    -algorithm RSA \
+    -pkeyopt rsa_keygen_bits:4096 \
+    -out ca.key
+
+chmod 600 ca.key
+
+openssl req \
+    -x509 \
+    -new \
+    -sha256 \
+    -days 3650 \
+    -key ca.key \
+    -out ca.crt \
+    -subj "/CN=Internal PostgreSQL CA"</pre>
+
+    <div class="warning">
+        Never copy <code>ca.key</code> to Windows or to an ordinary user account. It can be used to issue trusted certificates.
+    </div>
+
+    <h3>Create the server certificate configuration</h3>
+<pre>vim server-cert.cnf</pre>
+
+    <p>Enter:</p>
+<pre>[req]
+prompt = no
+distinguished_name = distinguished_name
+req_extensions = requested_extensions
+
+[distinguished_name]
+CN = internalsystemsdocker
+
+[requested_extensions]
+subjectAltName = @subject_alternative_names
+
+[subject_alternative_names]
+DNS.1 = internalsystemsdocker
+IP.1 = 172.25.0.16</pre>
+
+    <h3>Create and sign the server certificate</h3>
+<pre>openssl genpkey \
+    -algorithm RSA \
+    -pkeyopt rsa_keygen_bits:3072 \
+    -out server.key
+
+openssl req \
+    -new \
+    -sha256 \
+    -key server.key \
+    -out server.csr \
+    -config server-cert.cnf
+
+openssl x509 \
+    -req \
+    -sha256 \
+    -days 825 \
+    -in server.csr \
+    -CA ca.crt \
+    -CAkey ca.key \
+    -CAcreateserial \
+    -out server.crt \
+    -extfile server-cert.cnf \
+    -extensions requested_extensions</pre>
+
+    <h3>Create the client certificate for PostgreSQL role qs4rw</h3>
+<pre>openssl genpkey \
+    -algorithm RSA \
+    -pkeyopt rsa_keygen_bits:3072 \
+    -out qs4rw.key
+
+openssl req \
+    -new \
+    -sha256 \
+    -key qs4rw.key \
+    -out qs4rw.csr \
+    -subj "/CN=qs4rw"</pre>
+
+    <p>Create the client extension file:</p>
+<pre>vim client-cert.cnf</pre>
+
+    <p>Enter:</p>
+<pre>basicConstraints = critical,CA:FALSE
+keyUsage = critical,digitalSignature,keyEncipherment
+extendedKeyUsage = clientAuth</pre>
+
+    <p>Sign the client certificate:</p>
+<pre>openssl x509 \
+    -req \
+    -sha256 \
+    -days 825 \
+    -in qs4rw.csr \
+    -CA ca.crt \
+    -CAkey ca.key \
+    -CAcreateserial \
+    -out qs4rw.crt \
+    -extfile client-cert.cnf</pre>
+
+    <h3>Verify the certificates</h3>
+<pre>openssl verify -CAfile ca.crt server.crt
+openssl verify -CAfile ca.crt qs4rw.crt
+
+openssl x509 \
+    -in server.crt \
+    -noout \
+    -subject \
+    -ext subjectAltName
+
+openssl x509 \
+    -in qs4rw.crt \
+    -noout \
+    -subject \
+    -ext extendedKeyUsage</pre>
+
+    <p>Expected highlights:</p>
+<pre>server.crt: OK
+qs4rw.crt: OK
+IP Address:172.25.0.16
+subject=CN = qs4rw
+TLS Web Client Authentication</pre>
+</section>
+
+<section id="install">
+    <h2>3. Install certificates and enable PostgreSQL SSL</h2>
+
+    <h3>Install the server files</h3>
+<pre>install \
+    -o postgres \
+    -g postgres \
+    -m 600 \
+    server.key \
+    /etc/postgresql/16/main/server.key
+
+install \
+    -o postgres \
+    -g postgres \
+    -m 644 \
+    server.crt \
+    /etc/postgresql/16/main/server.crt
+
+install \
+    -o postgres \
+    -g postgres \
+    -m 644 \
+    ca.crt \
+    /etc/postgresql/16/main/root.crt</pre>
+
+    <h3>Back up and edit postgresql.conf</h3>
+<pre>cp \
+    /etc/postgresql/16/main/postgresql.conf \
+    /etc/postgresql/16/main/postgresql.conf.before-ssl
+
+vim /etc/postgresql/16/main/postgresql.conf</pre>
+
+    <p>Set these four values:</p>
+<pre>ssl = on
+ssl_ca_file = '/etc/postgresql/16/main/root.crt'
+ssl_cert_file = '/etc/postgresql/16/main/server.crt'
+ssl_key_file = '/etc/postgresql/16/main/server.key'</pre>
+
+    <div class="warning">
+        Be especially careful with <code>ssl_cert_file</code> and <code>ssl_key_file</code>. The certificate must point to <code>server.crt</code>; the private key must point to <code>server.key</code>.
+    </div>
+
+    <h3>Confirm the effective paths before restarting</h3>
+<pre>sudo -u postgres /usr/lib/postgresql/16/bin/postgres \
+    -D /var/lib/postgresql/16/main \
+    -C ssl_cert_file \
+    -c config_file=/etc/postgresql/16/main/postgresql.conf
+
+sudo -u postgres /usr/lib/postgresql/16/bin/postgres \
+    -D /var/lib/postgresql/16/main \
+    -C ssl_key_file \
+    -c config_file=/etc/postgresql/16/main/postgresql.conf
+
+sudo -u postgres /usr/lib/postgresql/16/bin/postgres \
+    -D /var/lib/postgresql/16/main \
+    -C ssl_ca_file \
+    -c config_file=/etc/postgresql/16/main/postgresql.conf</pre>
+
+    <p>Expected:</p>
+<pre>/etc/postgresql/16/main/server.crt
+/etc/postgresql/16/main/server.key
+/etc/postgresql/16/main/root.crt</pre>
+
+    <h3>Restart the real PostgreSQL cluster</h3>
+<pre>systemctl restart postgresql@16-main
+systemctl --no-pager --full status postgresql@16-main</pre>
+
+    <p>The service must show:</p>
+<pre>Active: active (running)</pre>
+
+    <div class="note">
+        On Ubuntu, <code>postgresql.service</code> is only an umbrella service and may show <code>active (exited)</code>. Check <code>postgresql@16-main</code> to confirm the actual database cluster is running.
+    </div>
+</section>
+
+<section id="hba">
+    <h2>4. Configure certificate authentication in pg_hba.conf</h2>
+
+    <p>Back up the file:</p>
+<pre>cp \
+    /etc/postgresql/16/main/pg_hba.conf \
+    /etc/postgresql/16/main/pg_hba.conf.before-cert</pre>
+
+    <p>Edit it:</p>
+<pre>vim /etc/postgresql/16/main/pg_hba.conf</pre>
+
+    <p>Add this line above any broader rule that could match the same user and client address:</p>
+<pre>hostssl    all    qs4rw    172.25.2.38/32    cert</pre>
+
+    <p>Example ordering:</p>
+<pre># Certificate authentication for Daniel's workstation
+hostssl    all    qs4rw    172.25.2.38/32    cert
+
+# Existing general password rules below
+host       all    all      172.25.0.0/16     scram-sha-256</pre>
+
+    <div class="warning">
+        PostgreSQL uses the first matching <code>pg_hba.conf</code> line. If a SCRAM rule appears first, PostgreSQL will request a password even though the certificate is configured correctly.
+    </div>
+
+    <h3>Validate the rule</h3>
+<pre>sudo -u postgres psql -X -d postgres -c "
+SELECT
+    line_number
+,   type
+,   database
+,   user_name
+,   address
+,   auth_method
+,   error
+FROM pg_hba_file_rules
+WHERE error IS NOT NULL
+   OR user_name @&gt; ARRAY['qs4rw'];
+"</pre>
+
+    <p>You should see:</p>
+<pre>type:         hostssl
+address:      172.25.2.38
+auth_method:  cert
+error:        blank</pre>
+
+    <p>Reload PostgreSQL after changing only <code>pg_hba.conf</code>:</p>
+<pre>systemctl reload postgresql@16-main</pre>
+</section>
+
+<section id="copy">
+    <h2>5. Copy the client certificate files to Windows</h2>
+
+    <p>Stage only the three client-side files in the Linux user's home directory:</p>
+<pre>install \
+    -o danv \
+    -g danv \
+    -m 644 \
+    /root/postgres-cert-setup/ca.crt \
+    /home/danv/ca.crt
+
+install \
+    -o danv \
+    -g danv \
+    -m 644 \
+    /root/postgres-cert-setup/qs4rw.crt \
+    /home/danv/qs4rw.crt
+
+install \
+    -o danv \
+    -g danv \
+    -m 600 \
+    /root/postgres-cert-setup/qs4rw.key \
+    /home/danv/qs4rw.key</pre>
+
+    <p>On Windows PowerShell:</p>
+<pre>New-Item `
+    -ItemType Directory `
+    -Force `
+    -Path "$HOME\.postgresql"
+
+scp danv@172.25.0.16:/home/danv/ca.crt `
+    "$HOME\.postgresql\ca.crt"
+
+scp danv@172.25.0.16:/home/danv/qs4rw.crt `
+    "$HOME\.postgresql\qs4rw.crt"
+
+scp danv@172.25.0.16:/home/danv/qs4rw.key `
+    "$HOME\.postgresql\qs4rw.key"</pre>
+
+    <p>After confirming the files exist on Windows, remove the temporary Linux copies:</p>
+<pre>rm \
+    /home/danv/ca.crt \
+    /home/danv/qs4rw.crt \
+    /home/danv/qs4rw.key</pre>
+
+    <p>The Windows paths should be:</p>
+<pre>C:\Users\dan.vandenbosch\.postgresql\ca.crt
+C:\Users\dan.vandenbosch\.postgresql\qs4rw.crt
+C:\Users\dan.vandenbosch\.postgresql\qs4rw.key</pre>
+</section>
+
+<section id="datagrip">
+    <h2>6. Configure DataGrip</h2>
+
+    <h3>General tab</h3>
+    <table>
+        <tr><th>Setting</th><th>Value</th></tr>
+        <tr><td>Host</td><td><code>172.25.0.16</code></td></tr>
+        <tr><td>Port</td><td><code>5432</code></td></tr>
+        <tr><td>User</td><td><code>qs4rw</code></td></tr>
+        <tr><td>Password</td><td>Blank</td></tr>
+        <tr><td>Database</td><td><code>sap_data_whse_qs4_100</code></td></tr>
+    </table>
+
+    <h3>SSH/SSL tab</h3>
+    <table>
+        <tr><th>Setting</th><th>Value</th></tr>
+        <tr><td>Use SSH tunnel</td><td><strong>Unchecked</strong></td></tr>
+        <tr><td>Use SSL</td><td><strong>Checked</strong></td></tr>
+        <tr><td>CA file</td><td><code>C:\Users\dan.vandenbosch\.postgresql\ca.crt</code></td></tr>
+        <tr><td>Client certificate file</td><td><code>C:\Users\dan.vandenbosch\.postgresql\qs4rw.crt</code></td></tr>
+        <tr><td>Client key file</td><td><code>C:\Users\dan.vandenbosch\.postgresql\qs4rw.key</code></td></tr>
+        <tr><td>Mode</td><td><code>Verify Full</code> preferred; <code>Verify CA</code> also works when hostname verification is not desired</td></tr>
+    </table>
+
+    <div class="note">
+        Do not use the SSH tunnel for this direct connection. With the tunnel enabled, PostgreSQL may see the connection as coming from <code>127.0.0.1</code> instead of <code>172.25.2.38</code>, so the certificate rule will not match.
+    </div>
+
+    <p>Click <strong>Test Connection</strong>.</p>
+</section>
+
+<section id="verify">
+    <h2>7. Verify that SSL and certificate authentication are in use</h2>
+
+    <p>After DataGrip connects, run:</p>
+<pre>SELECT
+    current_user
+,   inet_client_addr()
+,   ssl
+,   version
+FROM pg_stat_ssl
+WHERE pid = pg_backend_pid();</pre>
+
+    <p>Expected highlights:</p>
+<pre>current_user = qs4rw
+inet_client_addr = 172.25.2.38
+ssl = true</pre>
+
+    <div class="success">
+        When this works with a blank PostgreSQL password, the client certificate is authenticating the <code>qs4rw</code role.
+    </div>
+</section>
+
+<section id="troubleshooting">
+    <h2>8. Troubleshooting</h2>
+
+    <h3>Error: “The server requested SCRAM-based authentication, but no password was provided.”</h3>
+    <p>This means PostgreSQL matched a password rule instead of the certificate rule.</p>
+    <ul>
+        <li>Move the <code>hostssl ... qs4rw ... cert</code> rule above broader SCRAM rules.</li>
+        <li>Confirm the client address is <code>172.25.2.38</code>.</li>
+        <li>Disable the DataGrip SSH tunnel.</li>
+        <li>Reload PostgreSQL after editing <code>pg_hba.conf</code>.</li>
+    </ul>
+
+    <p>Inspect rule ordering:</p>
+<pre>sudo -u postgres psql -X -d postgres -c "
+SELECT
+    line_number
+,   type
+,   database
+,   user_name
+,   address
+,   auth_method
+FROM pg_hba_file_rules
+WHERE type IN
+(
+    'host'
+,   'hostssl'
+)
+ORDER BY line_number;
+"</pre>
+
+    <h3>PostgreSQL fails to start after enabling SSL</h3>
+    <p>Check the actual cluster status and journal:</p>
+<pre>systemctl --no-pager --full status postgresql@16-main
+
+journalctl \
+    -u postgresql@16-main \
+    --no-pager \
+    -n 50</pre>
+
+    <p>Common causes:</p>
+    <ul>
+        <li><code>ssl_cert_file</code> accidentally points to a private key.</li>
+        <li><code>ssl_key_file</code> points to the wrong key.</li>
+        <li>The certificate and key do not match.</li>
+        <li>The key permissions are too open.</li>
+    </ul>
+
+    <p>Check file ownership and permissions:</p>
+<pre>ls -l \
+    /etc/postgresql/16/main/server.crt \
+    /etc/postgresql/16/main/server.key \
+    /etc/postgresql/16/main/root.crt</pre>
+
+    <p>Expected:</p>
+<pre>-rw-r--r-- postgres postgres server.crt
+-rw------- postgres postgres server.key
+-rw-r--r-- postgres postgres root.crt</pre>
+
+    <h3>Confirm the certificate and key match</h3>
+<pre>openssl x509 \
+    -noout \
+    -modulus \
+    -in /etc/postgresql/16/main/server.crt \
+    | openssl sha256
+
+openssl rsa \
+    -noout \
+    -modulus \
+    -in /etc/postgresql/16/main/server.key \
+    | openssl sha256</pre>
+
+    <p>The two SHA-256 values must be identical.</p>
+</section>
+
+<section>
+    <h2>Final checklist</h2>
+    <ul class="checklist">
+        <li>PostgreSQL cluster is <code>active (running)</code></li>
+        <li>Server certificate contains IP SAN <code>172.25.0.16</code></li>
+        <li>Client certificate CN is exactly <code>qs4rw</code></li>
+        <li><code>pg_hba.conf</code> certificate rule appears before SCRAM rules</li>
+        <li>DataGrip SSH tunnel is disabled</li>
+        <li>DataGrip SSL is enabled</li>
+        <li>CA, client certificate, and client key paths are correct</li>
+        <li>PostgreSQL password field is blank</li>
+        <li>Test query returns <code>ssl = true</code></li>
+    </ul>
+</section>
+
+<footer>
+    Prepared for the PostgreSQL 16.14 server <code>internalsystemsdocker</code> at <code>172.25.0.16</code>.
+</footer>
+</article>
+</main>
+</body>
+</html>
