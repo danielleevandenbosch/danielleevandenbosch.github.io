@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Checklist App</title>
+        <style>
+            body 
+            {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+                margin: 0;
+                padding: 40px 20px;
+                background: #fafafa;
+            }
+            .progress-bar 
+            {
+                position: sticky;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                background: white;
+                padding: 16px 0;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
+            }
+            .progress-content {
+                max-width: 700px;
+                margin: 0 auto;
+                padding: 0 24px;
+            }
+            .progress-text 
+            {
+                font-size: 13px;
+                font-weight: 500;
+                color: #555;
+                margin-bottom: 8px;
+                letter-spacing: 0.3px;
+            }
+            .progress-track 
+            {
+                width: 100%;
+                height: 6px;
+                background: #e8e8e8;
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            .progress-fill 
+            {
+                height: 100%;
+                background: linear-gradient(90deg, #6b7280, #5a6370);
+                border-radius: 3px;
+                transition: width 0.3s ease;
+                width: 0%;
+                box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
+            }
+            .container 
+            {
+                max-width: 700px;
+                margin: 0 auto;
+                background: white;
+                padding: 32px;
+                border-radius: 6px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.08);
+            }
+            h1 
+            {
+                color: #222;
+                font-size: 28px;
+                margin: 0 0 24px 0;
+                font-weight: 600;
+                letter-spacing: -0.5px;
+            }
+            textarea 
+            {
+                width: 100%;
+                height: 160px;
+                padding: 12px;
+                font-size: 15px;
+                box-sizing: border-box;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-family: inherit;
+                resize: vertical;
+                transition: border-color 0.2s, box-shadow 0.2s;
+            }
+            textarea:focus 
+            {
+                outline: none;
+                border-color: #999;
+                box-shadow: 0 0 0 3px rgba(100, 100, 100, 0.05);
+            }
+            .button-group {
+                margin-top: 16px;
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            button {
+                padding: 10px 16px;
+                font-size: 14px;
+                cursor: pointer;
+                background: #f3f4f6;
+                color: #374151;
+                border: 1px solid #d1d5db;
+                border-radius: 4px;
+                transition: all 0.2s;
+                font-weight: 500;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            }
+            button:hover 
+            {
+                background: #e5e7eb;
+                border-color: #9ca3af;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+                transform: translateY(-1px);
+            }
+            button:active 
+            {
+                transform: translateY(0);
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            }
+            ul 
+            {
+                list-style: none;
+                padding-left: 0;
+                margin-top: 28px;
+            }
+            li 
+            {
+                padding: 14px 12px;
+                border-bottom: 1px solid #f0f0f0;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                transition: background 0.2s;
+                border-left: 3px solid transparent;
+            }
+            li:hover 
+            {
+                background: #fafafa;
+            }
+            li:last-child {
+                border-bottom: none;
+            }
+            .item-number 
+            {
+                font-weight: 600;
+                color: #999;
+                min-width: 28px;
+                text-align: right;
+                font-size: 14px;
+            }
+            li.completed .item-number 
+            {
+                color: #ccc;
+            }
+            li.completed span 
+            {
+                text-decoration: line-through;
+                color: #bbb;
+            }
+            input[type="checkbox"] 
+            {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+                accent-color: #6b7280;
+                flex-shrink: 0;
+            }
+            li span:not(.item-number) 
+            {
+                color: #333;
+                font-size: 15px;
+                flex: 1;
+            }
+            .action-button 
+            {
+                padding: 6px 10px;
+                font-size: 12px;
+                font-weight: 500;
+                background: #f9fafb;
+                color: #6b7280;
+                border: 1px solid #e5e7eb;
+                border-radius: 3px;
+                cursor: pointer;
+                transition: all 0.2s;
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+            .action-button:hover {
+                background: #f3f4f6;
+                border-color: #d1d5db;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            }
+            .action-button:active {
+                transform: scale(0.98);
+            }
+            .highlight-button 
+            {
+                font-size: 14px;
+                padding: 6px 8px;
+                color: #d1d5db;
+            }
+            .highlight-button.active 
+            {
+                color: #fbbf24;
+                border-color: #fbbf24;
+                background: #fffbeb;
+            }
+            li.highlighted 
+            {
+                background: #fffbeb;
+                border-left: 3px solid #fbbf24;
+                padding-left: 9px;
+            }
+            li.highlighted:hover {
+                background: #fef3c7;
+            }
+            li.completed.highlighted {
+                background: #fafafa;
+                border-left-color: #ddd;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="progress-bar">
+            <div class="progress-content">
+                <div class="progress-text"><span id="progressText">0 of 0 completed</span></div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <h1>Checklist App</h1>
+            <textarea id="itemInput" placeholder="Paste one item per line"></textarea>
+            <div class="button-group">
+                <button onclick="generateChecklist()">Generate Checklist</button>
+                <button onclick="sortChecklist()">Sort Alphabetically</button>
+                <button onclick="removeDuplicates()">Remove Duplicates</button>
+                <button onclick="clearChecklist()">Clear Checklist</button>
+            </div>
+            <ul id="checklist"></ul>
+        </div>
+        <script>
+            function updateProgress() {
+                const checklist = document.getElementById("checklist");
+                const items = checklist.querySelectorAll("li");
+                const completed = checklist.querySelectorAll("li.completed").length;
+                const total = items.length;
+                const percentage = total === 0 ? 0 : (completed / total) * 100;
+                
+                document.getElementById("progressText").textContent = `${completed} of ${total} completed`;
+                document.getElementById("progressFill").style.width = percentage + "%";
+            }
+            
+            function copyToClipboard(text, button) 
+            {
+                navigator.clipboard.writeText(text).then
+                (
+                    () => 
+                    {
+                        const originalText = button.textContent;
+                        button.textContent = "Copied!";
+                        button.style.background = "#d4edda";
+                        button.style.borderColor = "#28a745";
+                        button.style.color = "#155724";
+                        setTimeout
+                        (
+                            () => 
+                            {
+                            button.textContent       = originalText;
+                            button.style.background  = "";
+                            button.style.borderColor = "";
+                            button.style.color       = "";
+                            }
+                        ,   2000
+                        );
+                    }
+                );
+            }
+            
+            function generateChecklist() 
+            {
+                const input = document.getElementById("itemInput").value;
+                const checklist = document.getElementById("checklist");
+                checklist.innerHTML = "";
+                const items = input
+                    .split(/[,\r\n]+/)
+                    .map(item => item.trim())
+                    .filter(item => item !== "");
+                items.forEach((item, index) => {
+                    createListItem(checklist, item, index + 1);
+                });
+                updateProgress();
+            }
+            
+            function createListItem(checklist, item, itemNumber) 
+            {
+                const listItem = document.createElement("li");
+                
+                const number = document.createElement("span");
+                number.className = "item-number";
+                number.textContent = itemNumber + ".";
+                
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                
+                const text = document.createElement("span");
+                text.textContent = item;
+                
+                const copyButton = document.createElement("button");
+                copyButton.textContent = "Copy";
+                copyButton.className = "action-button";
+                copyButton.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    copyToClipboard(item, copyButton);
+                });
+                
+                const highlightButton = document.createElement("button");
+                highlightButton.textContent = "★";
+                highlightButton.className = "action-button highlight-button";
+                highlightButton.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    listItem.classList.toggle("highlighted");
+                    highlightButton.classList.toggle("active");
+                });
+                
+                checkbox.addEventListener("change", function () {
+                    listItem.classList.toggle("completed", checkbox.checked);
+                    if (checkbox.checked) {
+                        listItem.classList.remove("highlighted");
+                        highlightButton.classList.remove("active");
+                    }
+                    updateProgress();
+                });
+                
+                listItem.addEventListener("click", function (e) 
+                {
+                    if (e.target !== copyButton && e.target !== highlightButton && e.target !== checkbox) 
+                    {
+                        checkbox.checked = !checkbox.checked;
+                        checkbox.dispatchEvent(new Event("change"));
+                    }
+                });
+                
+                listItem.appendChild(checkbox);
+                listItem.appendChild(number);
+                listItem.appendChild(text);
+                listItem.appendChild(copyButton);
+                listItem.appendChild(highlightButton);
+                checklist.appendChild(listItem);
+            }
+            
+            function sortChecklist() 
+            {
+                const checklist = document.getElementById("checklist");
+                const items = Array.from(checklist.querySelectorAll("li"));
+                
+                if (items.length === 0) return;
+                
+                items.sort((a, b) => {
+                    const textA = a.querySelector("span:not(.item-number)").textContent.toLowerCase();
+                    const textB = b.querySelector("span:not(.item-number)").textContent.toLowerCase();
+                    return textA.localeCompare(textB);
+                });
+                
+                checklist.innerHTML = "";
+                items.forEach((item, index) => {
+                    item.querySelector(".item-number").textContent = (index + 1) + ".";
+                    checklist.appendChild(item);
+                });
+            }
+            
+            function removeDuplicates() 
+            {
+                const checklist = document.getElementById("checklist");
+                const items = Array.from(checklist.querySelectorAll("li"));
+                
+                if (items.length === 0) return;
+                
+                const seen = new Set();
+                const itemsToRemove = [];
+                
+                items.forEach(item => {
+                    const text = item.querySelector("span:not(.item-number)").textContent.toLowerCase();
+                    if (seen.has(text)) {
+                        itemsToRemove.push(item);
+                    } else {
+                        seen.add(text);
+                    }
+                });
+                
+                itemsToRemove.forEach(item => 
+                {
+                    item.remove();
+                });
+                
+                // Renumber remaining items
+                const remainingItems = checklist.querySelectorAll("li");
+                remainingItems.forEach((item, index) => {
+                    item.querySelector(".item-number").textContent = (index + 1) + ".";
+                });
+                
+                updateProgress();
+            }
+            
+            function clearChecklist() {
+                document.getElementById("itemInput").value = "";
+                document.getElementById("checklist").innerHTML = "";
+                updateProgress();
+            }
+        </script>
+    </body>
+</html>
